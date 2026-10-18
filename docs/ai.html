@@ -42,7 +42,22 @@
       <div class="step"><b>⑥ 전력·인프라</b><span class="t-sub">데이터센터 전력, 냉각, 전력망</span><div class="tickers">전력기기·유틸리티 (확장 학습)</div></div>
     </div>
     <div class="callout tip"><b>핵심 논리</b>①에서 돈을 벌어야 ②가 투자를 계속하고, ②의 CapEx가 ③④⑤의 매출이 됩니다. 그래서 <b>빅테크 실적 발표의 CapEx 가이던스</b>가 반도체주에 가장 중요한 지표입니다. 위쪽(①)이 흔들리면 아래쪽 전체가 흔들립니다.</div>
+    <p class="t-sub" style="margin:8px 0 0"><a href="#companies">단계별 핵심 기업 전체 보기 ↓</a></p>
   </div>
+
+  <h2 id="companies">🏢 밸류체인별 핵심 기업 지도</h2>
+  <div class="card">
+    <p style="margin-top:0">AI 데이터센터 하나가 만들어지기까지 거치는 단계를 순서대로 정리했습니다. 티커를 누르면 Yahoo Finance 시세 페이지가 열립니다. <span class="t-sub">(비상장 기업은 링크 없음)</span></p>
+    <div style="display:flex;flex-wrap:wrap;gap:10px;align-items:center">
+      <span class="t-sub">국가</span>
+      <div class="seg" id="country">
+        <button data-c="all" class="on">전체</button><button data-c="🇺🇸">미국</button><button data-c="🇰🇷">한국</button><button data-c="etc">대만·일본·유럽 등</button>
+      </div>
+      <span class="t-sub" id="co-count"></span>
+    </div>
+  </div>
+  <div class="grid g2" id="layers" style="margin-top:12px"></div>
+  <div class="callout warn" style="margin-top:12px"><b>읽을 때 주의</b>대형 기업은 여러 단계에 걸쳐 있습니다(예: 삼성전자 = 메모리 + 파운드리, 구글 = 모델 + 클라우드 + 자체 칩 TPU). 표에서는 AI와 관련해 가장 대표적인 역할 기준으로 나눴습니다. 이 목록은 공부용 지도이며 추천 종목이 아닙니다.</div>
 
   <h2>🧩 이번 주 테마</h2>
   <div class="grid g2" id="themes"></div>
@@ -78,6 +93,127 @@
 </main>
 <script src="assets/app.js"></script>
 <script>
+// 밸류체인별 핵심 기업 (정적 데이터). [이름, Yahoo 티커 또는 null(비상장), 국가, 역할]
+const LAYERS = [
+  { title: "① AI 모델·서비스", desc: "AI를 직접 만들거나 서비스로 팔아 최종 매출을 내는 곳. 이들의 수익이 체인 전체의 돈줄입니다.",
+    watch: "AI 매출 성장률, 유료 사용자 수, 기업 도입률", cos: [
+    ["OpenAI", null, "🇺🇸", "ChatGPT, GPT 모델 (비상장)"],
+    ["Anthropic", null, "🇺🇸", "Claude 모델 (비상장)"],
+    ["xAI", null, "🇺🇸", "Grok 모델 (비상장)"],
+    ["알파벳", "GOOGL", "🇺🇸", "Gemini, 검색·유튜브에 AI 적용"],
+    ["메타", "META", "🇺🇸", "Llama 모델, 광고 추천 AI"],
+    ["마이크로소프트", "MSFT", "🇺🇸", "Copilot, OpenAI 최대 파트너"],
+    ["팔란티어", "PLTR", "🇺🇸", "기업·정부용 AI 플랫폼 (AIP)"],
+    ["세일즈포스", "CRM", "🇺🇸", "CRM에 AI 에이전트 결합"],
+    ["서비스나우", "NOW", "🇺🇸", "업무 자동화 AI"],
+    ["NAVER", "035420.KS", "🇰🇷", "하이퍼클로바X, 한국형 AI"],
+    ["카카오", "035720.KS", "🇰🇷", "카카오톡 기반 AI 서비스"],
+  ]},
+  { title: "② 클라우드 (하이퍼스케일러·네오클라우드)", desc: "데이터센터를 짓고 GPU를 대량으로 사서 AI 연산 능력을 빌려주는 곳. 이들의 설비투자(CapEx)가 아래 단계의 매출이 됩니다.",
+    watch: "분기 CapEx와 가이던스, 클라우드 매출 성장률", cos: [
+    ["마이크로소프트", "MSFT", "🇺🇸", "Azure"],
+    ["아마존", "AMZN", "🇺🇸", "AWS (자체 칩 Trainium)"],
+    ["알파벳", "GOOGL", "🇺🇸", "Google Cloud (자체 칩 TPU)"],
+    ["오라클", "ORCL", "🇺🇸", "OCI, 대형 AI 데이터센터 계약"],
+    ["메타", "META", "🇺🇸", "자체 AI 데이터센터 (외부 판매 X)"],
+    ["코어위브", "CRWV", "🇺🇸", "GPU 전문 클라우드 (네오클라우드)"],
+    ["네비우스", "NBIS", "🇳🇱", "GPU 전문 클라우드"],
+  ]},
+  { title: "③ AI 반도체 설계", desc: "AI 연산용 칩(GPU, 맞춤형 ASIC)을 설계하는 곳. 데이터센터 CapEx에서 가장 큰 몫을 가져갑니다.",
+    watch: "데이터센터 매출, 차세대 칩 출시 일정, 고객사 다변화", cos: [
+    ["엔비디아", "NVDA", "🇺🇸", "GPU 1위 + CUDA 소프트웨어 생태계"],
+    ["AMD", "AMD", "🇺🇸", "GPU (MI 시리즈) 2위"],
+    ["브로드컴", "AVGO", "🇺🇸", "빅테크 맞춤형 칩(ASIC) + 네트워크 칩"],
+    ["마벨", "MRVL", "🇺🇸", "맞춤형 칩, 데이터센터 연결 칩"],
+    ["Arm", "ARM", "🇬🇧", "CPU 설계 IP (라이선스)"],
+    ["시놉시스", "SNPS", "🇺🇸", "칩 설계 소프트웨어 (EDA)"],
+    ["케이던스", "CDNS", "🇺🇸", "칩 설계 소프트웨어 (EDA)"],
+    ["리벨리온", null, "🇰🇷", "AI 추론 칩 (비상장)"],
+    ["퓨리오사AI", null, "🇰🇷", "AI 추론 칩 (비상장)"],
+  ]},
+  { title: "④ 메모리 (HBM)", desc: "GPU 옆에 쌓아 붙이는 고대역폭 메모리(HBM). AI 칩 성능을 좌우하며 한국이 가장 강한 영역입니다.",
+    watch: "HBM 점유율·고객사 인증, D램 가격, 중국 업체 공급", cos: [
+    ["SK하이닉스", "000660.KS", "🇰🇷", "HBM 1위, 엔비디아 주력 공급"],
+    ["삼성전자", "005930.KS", "🇰🇷", "메모리 1위, HBM 추격"],
+    ["마이크론", "MU", "🇺🇸", "HBM 3위"],
+    ["CXMT", null, "🇨🇳", "중국 D램 (상하이 상장, 해외 투자 제한)"],
+  ]},
+  { title: "⑤ 파운드리·패키징", desc: "설계된 칩을 실제로 만들고(파운드리), GPU와 HBM을 하나로 붙이는(첨단 패키징) 곳.",
+    watch: "첨단 공정·CoWoS 패키징 생산능력, 가동률", cos: [
+    ["TSMC", "TSM", "🇹🇼", "AI 칩 생산 독점적 1위 + CoWoS 패키징"],
+    ["삼성전자", "005930.KS", "🇰🇷", "파운드리 2위"],
+    ["인텔", "INTC", "🇺🇸", "파운드리 사업 확대 중"],
+    ["ASE", "ASX", "🇹🇼", "후공정(패키징·테스트) 1위"],
+    ["앰코", "AMKR", "🇺🇸", "후공정 패키징"],
+    ["삼성전기", "009150.KS", "🇰🇷", "AI 서버용 반도체 기판 (FC-BGA)"],
+  ]},
+  { title: "⑥ 반도체 장비·부품", desc: "칩과 HBM을 만드는 장비를 공급하는 곳. 반도체 회사들의 설비투자가 늘면 함께 성장합니다.",
+    watch: "반도체 회사 설비투자 계획, 수주잔고, 중국 수출 규제", cos: [
+    ["ASML", "ASML", "🇳🇱", "EUV 노광장비 독점"],
+    ["어플라이드 머티어리얼즈", "AMAT", "🇺🇸", "증착·식각 장비 1위"],
+    ["램리서치", "LRCX", "🇺🇸", "식각 장비"],
+    ["KLA", "KLAC", "🇺🇸", "검사·계측 장비"],
+    ["도쿄일렉트론", "8035.T", "🇯🇵", "종합 반도체 장비"],
+    ["어드반테스트", "6857.T", "🇯🇵", "AI 칩 테스트 장비"],
+    ["한미반도체", "042700.KS", "🇰🇷", "HBM 적층용 TC 본더"],
+    ["HPSP", "403870.KQ", "🇰🇷", "고압 수소 어닐링 장비"],
+    ["원익IPS", "240810.KQ", "🇰🇷", "증착 장비"],
+    ["리노공업", "058470.KQ", "🇰🇷", "반도체 테스트 소켓"],
+    ["ISC", "095340.KQ", "🇰🇷", "AI 칩 테스트 소켓"],
+  ]},
+  { title: "⑦ 서버·네트워크", desc: "칩을 서버로 조립하고, 수만 개의 GPU를 하나처럼 연결하는 네트워크 장비를 만드는 곳.",
+    watch: "AI 서버 출하량, 800G·1.6T 광통신 수요", cos: [
+    ["슈퍼마이크로", "SMCI", "🇺🇸", "AI 서버 조립"],
+    ["델", "DELL", "🇺🇸", "AI 서버"],
+    ["폭스콘 (홍하이)", "2317.TW", "🇹🇼", "엔비디아 서버 위탁 생산"],
+    ["콴타", "2382.TW", "🇹🇼", "빅테크 서버 위탁 생산"],
+    ["아리스타", "ANET", "🇺🇸", "데이터센터 네트워크 스위치"],
+    ["시스코", "CSCO", "🇺🇸", "네트워크 장비"],
+    ["코히런트", "COHR", "🇺🇸", "광통신 트랜시버"],
+    ["이수페타시스", "007660.KS", "🇰🇷", "AI 서버·스위치용 고다층 기판(MLB)"],
+  ]},
+  { title: "⑧ 전력·냉각·에너지", desc: "AI 데이터센터는 전기를 엄청나게 씁니다. 전력 공급, 변압기, 냉각 설비가 새로운 병목이 되었습니다.",
+    watch: "데이터센터 전력 수요 전망, 변압기 수주·리드타임, 원전 계약", cos: [
+    ["버티브", "VRT", "🇺🇸", "데이터센터 전력·냉각 설비"],
+    ["이튼", "ETN", "🇺🇸", "전력 관리 장비"],
+    ["GE 버노바", "GEV", "🇺🇸", "가스터빈·전력망 장비"],
+    ["컨스텔레이션 에너지", "CEG", "🇺🇸", "원전 전력, 빅테크 장기 공급계약"],
+    ["슈나이더 일렉트릭", "SU.PA", "🇫🇷", "전력·냉각 설비"],
+    ["HD현대일렉트릭", "267260.KS", "🇰🇷", "초고압 변압기 (북미 수출)"],
+    ["LS ELECTRIC", "010120.KS", "🇰🇷", "배전·전력기기"],
+    ["효성중공업", "298040.KS", "🇰🇷", "초고압 변압기"],
+    ["두산에너빌리티", "034020.KS", "🇰🇷", "원전·가스터빈 주기기"],
+  ]},
+];
+
+(function renderCompanies() {
+  const E = App.esc;
+  const etc = (c) => c !== "🇺🇸" && c !== "🇰🇷";
+  // 윈도우는 국기 이모지를 그리지 못해 한글 배지로 표시
+  const NATION = { "🇺🇸": "미국", "🇰🇷": "한국", "🇹🇼": "대만", "🇯🇵": "일본", "🇳🇱": "네덜란드", "🇬🇧": "영국", "🇫🇷": "프랑스", "🇨🇳": "중국" };
+  const badge = (c) => `<span class="pill ${c === "🇰🇷" ? "up" : c === "🇺🇸" ? "info" : "neutral"}">${NATION[c] || c}</span>`;
+  function draw(filter) {
+    let n = 0;
+    document.getElementById("layers").innerHTML = LAYERS.map((L) => {
+      const rows = L.cos.filter(([, , c]) => filter === "all" || (filter === "etc" ? etc(c) : c === filter));
+      n += rows.length;
+      if (!rows.length) return "";
+      return `<div class="card"><h3>${E(L.title)}</h3><p class="t-sub" style="margin-top:0">${E(L.desc)}</p>
+        <div class="table-wrap"><table><tr><th class="l">기업</th><th class="l">티커</th><th class="l">역할</th></tr>
+        ${rows.map(([name, t, c, role]) => `<tr><td class="l">${badge(c)} <b>${E(name)}</b></td>
+          <td class="l mono">${t ? `<a href="https://finance.yahoo.com/quote/${encodeURIComponent(t)}" target="_blank" rel="noopener">${E(t)}</a>` : `<span class="t-sub">비상장</span>`}</td>
+          <td class="l t-sub">${E(role)}</td></tr>`).join("")}</table></div>
+        <p class="t-sub" style="margin:8px 0 0">📌 볼 지표: ${E(L.watch)}</p></div>`;
+    }).join("");
+    document.getElementById("co-count").textContent = `${n}개 기업`;
+  }
+  document.querySelectorAll("#country button").forEach((b) => b.onclick = () => {
+    document.querySelectorAll("#country button").forEach((x) => x.classList.toggle("on", x === b));
+    draw(b.dataset.c);
+  });
+  draw("all");
+})();
+
 (async () => {
   const [m, sig, w] = await Promise.all([App.load("data/market.json"), App.load("data/signals.json"), App.loadOpt("content/weekly/latest.json")]);
   const $ = (id) => document.getElementById(id);
