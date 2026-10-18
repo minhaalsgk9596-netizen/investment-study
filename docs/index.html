@@ -1,0 +1,112 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>투자 스터디 대시보드</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css">
+<link rel="stylesheet" href="assets/style.css">
+</head>
+<body>
+<main>
+  <div class="page-head">
+    <div>
+      <h1>투자 스터디 대시보드</h1>
+      <p class="subtitle" id="week">한·미 시장 핵심 지표와 이번 주 흐름</p>
+    </div>
+    <div class="stamp"></div>
+  </div>
+
+  <div class="card" style="margin-top:12px">
+    <span class="pill info">이번 주 한 줄</span>
+    <h2 id="headline" style="margin:.5rem 0 .3rem">-</h2>
+    <p id="oneliner" class="subtitle"></p>
+  </div>
+
+  <h2>📊 주요 지수</h2>
+  <div class="grid g4" id="indices"></div>
+
+  <h2>💱 환율 · 금리 · 원자재</h2>
+  <div class="grid g4" id="fxrates"></div>
+
+  <h2>🏦 매크로 핵심</h2>
+  <div class="grid g4" id="macro"></div>
+
+  <div class="grid g2" style="margin-top:2rem">
+    <div class="card">
+      <h3>🤖 AI 종목 1주 성과</h3>
+      <div class="table-wrap"><table id="ai"></table></div>
+      <p class="t-sub" style="margin-top:8px"><a href="ai.html">AI 섹터 분석 보기 →</a></p>
+    </div>
+    <div class="card">
+      <h3>🎯 매수 체크리스트 점수 (상위)</h3>
+      <p class="t-sub">추세·모멘텀·변동성·거래량 조건을 몇 개나 충족하는지 0~100점으로 나타낸 값 (<a href="indicators.html#checklist">계산 방법</a>)</p>
+      <div id="scores"></div>
+    </div>
+  </div>
+
+  <div class="grid g2" style="margin-top:12px">
+    <div class="card">
+      <h3>📅 다가오는 일정</h3>
+      <div class="table-wrap"><table id="calendar"></table></div>
+    </div>
+    <div class="card">
+      <h3>💬 이번 주 토론 질문</h3>
+      <ol class="clean" id="questions"></ol>
+      <p class="t-sub"><a href="slides.html">발표 슬라이드 열기 →</a></p>
+    </div>
+  </div>
+</main>
+<script src="assets/app.js"></script>
+<script>
+(async () => {
+  const [m, macro, sig, w] = await Promise.all([
+    App.load("data/market.json"), App.load("data/macro.json"),
+    App.load("data/signals.json"), App.loadOpt("content/weekly/latest.json"),
+  ]);
+  const $ = (id) => document.getElementById(id);
+  const by = (g) => Object.entries(m).filter(([, v]) => v.group === g);
+
+  if (w) {
+    $("week").textContent = w.week;
+    $("headline").textContent = w.headline;
+    $("oneliner").textContent = w.one_liner;
+    $("calendar").innerHTML = `<tr><th>날짜</th><th class="l">이벤트</th><th class="l">왜 중요?</th></tr>` +
+      w.calendar.map((c) => `<tr><td>${App.esc(c.date)}</td><td class="l"><b>${App.esc(c.event)}</b></td><td class="l t-sub">${App.esc(c.why)}</td></tr>`).join("");
+    $("questions").innerHTML = w.study_questions.map((q) => `<li>${App.esc(q)}</li>`).join("");
+  }
+
+  $("indices").innerHTML = by("index").map(([, v]) => App.tile(v)).join("");
+  $("fxrates").innerHTML = [...by("fx"), ...by("rate"), ...by("commodity")]
+    .map(([s, v]) => App.tile(v, { unit: s === "^TNX" ? "%" : "" })).join("");
+
+  const mk = (id, unit = "%") => {
+    const x = macro[id];
+    if (!x) return "";
+    const d = x.prev == null ? null : x.last - x.prev;
+    const cls = d > 0 ? "up" : d < 0 ? "down" : "flat-c";
+    return `<div class="card tile"><div class="t-name">${x.name}</div>
+      <div class="t-val">${App.num(x.last, id === "PAYEMS" ? 0 : 2)}${unit}</div>
+      <div class="t-chg"><span class="${cls}">${d == null ? "" : (d > 0 ? "▲" : d < 0 ? "▼" : "") + App.num(Math.abs(d), 2)}</span> <span class="t-sub">직전 대비</span></div>
+      <div class="t-sub">${x.date.slice(0, 7)} 기준</div></div>`;
+  };
+  $("macro").innerHTML = ["CPIAUCNS", "CPILFENS", "DFF", "DGS10", "UNRATE", "KR_CPI", "KR_BASE_RATE", "T10Y2Y"]
+    .map((id) => mk(id, id === "T10Y2Y" ? "%p" : "%")).join("");
+
+  $("ai").innerHTML = `<tr><th>종목</th><th>종가</th><th>1W</th><th>YTD</th></tr>` +
+    by("ai").sort((a, b) => b[1].chg1w - a[1].chg1w)
+      .map(([, v]) => `<tr><td>${v.name}</td><td>${App.smart(v.last)}</td><td>${App.chg(v.chg1w)}</td><td>${App.chg(v.ytd)}</td></tr>`).join("");
+
+  const items = Object.entries(sig.items).filter(([, v]) => ["ai", "index"].includes(v.group) && v.name.indexOf("VIX") < 0)
+    .sort((a, b) => b[1].score - a[1].score).slice(0, 8);
+  $("scores").innerHTML = items.map(([, v]) => `
+    <div style="margin:10px 0">
+      <div style="display:flex;justify-content:space-between;gap:8px"><span>${v.name}</span><b>${v.score}</b></div>
+      <div class="score-bar"><span style="width:${v.score}%"></span></div>
+    </div>`).join("");
+
+  App.drawSparks();
+})().catch((e) => { document.querySelector("main").insertAdjacentHTML("beforeend", `<p class="empty">데이터를 불러오지 못했습니다: ${e.message}</p>`); });
+</script>
+</body>
+</html>

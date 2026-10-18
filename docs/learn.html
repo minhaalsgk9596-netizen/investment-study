@@ -1,0 +1,186 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>더 공부하기</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css">
+<link rel="stylesheet" href="assets/style.css">
+<style>
+  .calc { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 180px), 1fr)); gap: 10px; }
+  .calc label { font-size: .85rem; color: var(--muted); display: block; }
+  .calc input { width: 100%; font: inherit; color: var(--text); background: var(--surface); border: 1px solid var(--border); border-radius: 8px; padding: 8px 10px; }
+  .calc-out { margin-top: 12px; font-size: 1.05rem; }
+</style>
+</head>
+<body>
+<main>
+  <div class="page-head">
+    <div>
+      <h1>더 공부하기</h1>
+      <p class="subtitle">보조지표 다음 단계: 기업 가치, 수급, 정책, 리스크 관리</p>
+    </div>
+  </div>
+  <nav class="toc">
+    <a href="#valuation">밸류에이션</a><a href="#earnings">실적 시즌</a><a href="#flow">수급·환율</a><a href="#policy">통화정책 읽기</a>
+    <a href="#rotation">섹터 로테이션</a><a href="#risk">리스크 관리</a><a href="#sentiment">시장 심리</a><a href="#price">가격 행동</a><a href="#roadmap">학습 로드맵</a><a href="#glossary">용어집</a>
+  </nav>
+
+  <h2 id="valuation">💰 밸류에이션: 이 가격이 싼가 비싼가</h2>
+  <div class="card">
+    <div class="table-wrap"><table>
+      <tr><th>지표</th><th class="l">계산</th><th class="l">해석</th><th class="l">언제 쓰나</th></tr>
+      <tr><td><b>PER</b></td><td class="l">주가 ÷ 주당순이익(EPS)</td><td class="l">이익의 몇 배에 거래되나. 낮을수록 싸 보임</td><td class="l">이익이 안정적인 기업</td></tr>
+      <tr><td><b>예상 PER</b></td><td class="l">주가 ÷ 향후 12개월 예상 EPS</td><td class="l">시장은 미래를 보므로 실전에서 더 많이 씀</td><td class="l">성장주</td></tr>
+      <tr><td><b>PEG</b></td><td class="l">PER ÷ 이익 성장률(%)</td><td class="l">1 미만이면 성장 대비 저평가로 봄</td><td class="l">고성장주끼리 비교</td></tr>
+      <tr><td><b>PBR</b></td><td class="l">주가 ÷ 주당순자산</td><td class="l">1 미만이면 장부가치보다 싸게 거래</td><td class="l">은행·보험·지주사, 경기 저점의 메모리주</td></tr>
+      <tr><td><b>EV/EBITDA</b></td><td class="l">(시총 + 순부채) ÷ EBITDA</td><td class="l">부채까지 포함한 기업 전체 가치 비교</td><td class="l">설비가 많은 기업, 인수합병</td></tr>
+      <tr><td><b>FCF 수익률</b></td><td class="l">잉여현금흐름 ÷ 시가총액</td><td class="l">실제로 남는 현금 기준 수익률</td><td class="l">빅테크처럼 현금 창출이 큰 기업</td></tr>
+    </table></div>
+    <div class="callout warn"><b>메모리 반도체의 역설</b>SK하이닉스·삼성전자 같은 사이클 업종은 <b>PER이 가장 낮을 때(이익 정점)가 고점</b>, PER이 높거나 적자일 때(이익 바닥)가 저점인 경우가 많습니다. 그래서 메모리주는 PER보다 PBR과 메모리 가격 사이클을 함께 봅니다.</div>
+    <div class="callout tip"><b>금리와 PER</b>이론적으로 적정 PER ≈ 1 ÷ (요구수익률 − 성장률)입니다. 금리가 오르면 요구수익률이 올라 적정 PER이 낮아집니다. 이번 주 고PER 성장주가 많이 빠진 이유 중 하나입니다.</div>
+  </div>
+
+  <h2 id="earnings">📑 실적 시즌 읽는 법</h2>
+  <div class="card">
+    <ul class="clean">
+      <li><b>시기</b>: 분기 끝나고 약 2~6주 뒤 (1·4·7·10월 중순~말). 미국은 대형 은행 → 빅테크 → 엔비디아(한 달 늦음) 순서. 한국은 삼성전자 <b>잠정실적</b>이 분기 첫 주에 먼저 나옵니다.</li>
+      <li><b>EPS 서프라이즈</b>: 실제 EPS vs 컨센서스(애널리스트 평균 예상). 주가는 '좋은 실적'이 아니라 '<b>예상보다</b> 좋은 실적'에 반응합니다.</li>
+      <li><b>가이던스</b>가 실적보다 중요한 경우가 많습니다. 다음 분기 매출 전망이 예상을 밑돌면 실적이 좋아도 주가가 빠집니다.</li>
+      <li><b>컨퍼런스 콜</b>: 경영진의 질의응답에서 수요·가격·CapEx 코멘트를 확인. AI 섹터는 "수요가 공급을 초과" 같은 표현이 중요합니다.</li>
+      <li><b>체크 순서</b>: 매출 → 영업이익률 → EPS → 가이던스 → 주요 사업부(예: 클라우드 성장률) → 주가 반응.</li>
+    </ul>
+  </div>
+
+  <h2 id="flow">🌊 수급과 환율 (한국 시장)</h2>
+  <div class="card">
+    <ul class="clean">
+      <li><b>외국인</b>: KOSPI 시가총액의 약 30%를 보유합니다. 대형주(특히 반도체) 방향을 좌우합니다. 원화 약세(환율 상승) 땐 환차손 우려로 매도하는 경향이 있습니다.</li>
+      <li><b>기관</b>: 연기금·투신·보험 등. 연기금은 급락장에서 매수 주체가 되는 경우가 많습니다.</li>
+      <li><b>개인</b>: 하락장에서 순매수가 늘어나는 경향이 있습니다.</li>
+      <li><b>프로그램 매매·선물 만기</b>: 매월 둘째 목요일 옵션 만기, 3·6·9·12월은 선물옵션 동시 만기(네 마녀의 날). 변동성이 커질 수 있습니다.</li>
+      <li><b>MSCI 리밸런싱</b>: 패시브 자금 유출입. 한국의 MSCI 선진국 지수 편입 여부도 장기 이슈입니다.</li>
+    </ul>
+    <div class="callout tip"><b>실습</b>네이버 증권의 종목별 '투자자별 매매동향'에서 외국인·기관이 며칠 연속 순매수하는지 보고, 거래량·OBV와 같은 방향인지 비교해 보세요.</div>
+  </div>
+
+  <h2 id="policy">🏛️ 통화정책 읽는 법 (연준 · 한은)</h2>
+  <div class="card">
+    <ul class="clean">
+      <li><b>성명서의 단어 변화</b>: 직전 회의 성명서와 나란히 놓고 바뀐 단어를 찾는 것이 기본입니다. ("추가 조정의 정도와 시기를 고려" → 인하/인상 시그널 약화 등)</li>
+      <li><b>점도표 (Dot Plot)</b>: 3·6·9·12월 FOMC에서 위원들의 금리 전망을 점으로 공개. 중간값이 시장 예상보다 높으면 매파적(긴축).</li>
+      <li><b>FedWatch</b>: CME 사이트에서 금리선물 가격으로 계산한 회의별 금리 변동 확률. "시장이 이미 얼마나 반영했나"를 보는 도구.</li>
+      <li><b>매파 vs 비둘기파</b>: 매파(Hawk) = 물가 잡기 우선, 금리 인상 선호. 비둘기파(Dove) = 성장·고용 우선, 인하 선호.</li>
+      <li><b>한은 금통위</b>: 결정문 + 총재 기자회견 + <b>소수의견</b>. 소수의견은 다음 움직임의 힌트로 해석됩니다.</li>
+    </ul>
+  </div>
+
+  <h2 id="rotation">🔄 섹터 로테이션</h2>
+  <div class="card">
+    <p>경기 국면과 금리에 따라 돈이 섹터 사이를 옮겨 다닙니다. 자세한 표는 <a href="macro.html#cycle">매크로 페이지의 경기 사이클</a>을 보세요.</p>
+    <ul class="clean">
+      <li><b>금리 상승기</b>: 은행·보험(예대마진), 에너지(물가) 상대 강세 / 성장주·리츠 약세</li>
+      <li><b>금리 하락기</b>: 성장주·바이오·리츠 강세</li>
+      <li><b>유가 급등</b>: 정유·에너지 강세 / 항공·화학 약세</li>
+      <li><b>원화 강세</b>: 내수·항공·여행 수혜 / 수출주 가격경쟁력 약화</li>
+    </ul>
+    <div class="callout tip"><b>실습</b>미국 섹터 ETF(XLK 기술, XLE 에너지, XLF 금융, XLV 헬스케어, XLU 유틸리티)의 1개월 수익률을 비교하면 지금 돈이 어디로 가는지 볼 수 있습니다.</div>
+  </div>
+
+  <h2 id="risk">🛡️ 리스크 관리 · 포지션 사이징</h2>
+  <div class="card">
+    <p>"얼마나 버느냐"보다 "<b>틀렸을 때 얼마나 잃느냐</b>"가 장기 성과를 결정합니다. -50% 손실을 복구하려면 +100%가 필요합니다.</p>
+    <div class="table-wrap"><table>
+      <tr><th>손실</th><td>-10%</td><td>-20%</td><td>-30%</td><td>-50%</td><td>-70%</td></tr>
+      <tr><th>복구에 필요한 수익</th><td>+11%</td><td>+25%</td><td>+43%</td><td>+100%</td><td>+233%</td></tr>
+    </table></div>
+    <h3>포지션 크기 계산기 (1% 룰)</h3>
+    <div class="calc">
+      <div><label>총 투자금 (원)</label><input id="k-cap" type="number" value="10000000"></div>
+      <div><label>1회 최대 손실 허용 (%)</label><input id="k-risk" type="number" value="1" step="0.5"></div>
+      <div><label>매수가</label><input id="k-entry" type="number" value="215500"></div>
+      <div><label>손절가 (예: 매수가 − 2×ATR)</label><input id="k-stop" type="number" value="195000"></div>
+    </div>
+    <div class="calc-out card flat" id="k-out"></div>
+    <ul class="clean" style="margin-top:12px">
+      <li><b>분할 매수</b>: 한 번에 다 사지 않고 2~3회로 나누기. 첫 매수가 틀렸을 때 피해를 줄입니다.</li>
+      <li><b>손절은 매수 전에 정하기</b>: 직전 저점 이탈, 20일선 이탈, -2 ATR 등 기준을 미리 적어둡니다.</li>
+      <li><b>집중도</b>: 한 종목이나 한 테마(예: AI 반도체)에 자산의 몇 %까지 둘지 상한을 정합니다. 이번 주 KOSPI처럼 쏠린 자산은 함께 떨어집니다.</li>
+    </ul>
+  </div>
+
+  <h2 id="sentiment">😱 시장 심리 지표</h2>
+  <div class="grid g3">
+    <div class="card flat"><h3>VIX (공포지수)</h3><p>S&P500 옵션으로 계산한 향후 30일 예상 변동성입니다. 15 이하면 안정, 20~30이면 불안, 30을 넘으면 공포로 봅니다. 극단적인 공포는 역발상 매수 구간이 되기도 합니다.</p></div>
+    <div class="card flat"><h3>공포·탐욕 지수</h3><p>CNN이 7개 지표(모멘텀, 풋/콜 비율, 정크본드 수요 등)를 합쳐 0~100으로 표시합니다. 25 이하는 극단적 공포입니다.</p></div>
+    <div class="card flat"><h3>펀드매니저 설문 · 신용잔고</h3><p>BofA 펀드매니저 설문의 '가장 붐비는 트레이드', 한국의 신용융자 잔고는 쏠림과 레버리지 수준을 보여줍니다. 쏠림이 클수록 하락할 때 낙폭이 커집니다.</p></div>
+  </div>
+
+  <h2 id="price">🕯️ 가격 행동 기초</h2>
+  <div class="card">
+    <ul class="clean">
+      <li><b>지지선·저항선</b>: 여러 번 반등한 가격대(지지)와 막힌 가격대(저항). 뚫리면 역할이 바뀝니다(저항 → 지지).</li>
+      <li><b>추세선</b>: 저점끼리 이은 선(상승 추세), 고점끼리 이은 선(하락 추세).</li>
+      <li><b>캔들</b>: 긴 아래꼬리(매수세 유입), 장대 양봉/음봉(강한 방향성), 도지(방향 고민).</li>
+      <li><b>멀티 타임프레임</b>: 주봉으로 큰 방향을 보고 일봉으로 진입 타이밍을 잡습니다.</li>
+      <li><b>갭</b>: 전날 종가와 오늘 시가 사이의 빈 공간. 메워지는 경우가 많지만, 거래량이 실린 돌파 갭은 추세 시작일 수 있습니다.</li>
+    </ul>
+  </div>
+
+  <h2 id="roadmap">🗺️ 스터디 학습 로드맵 (제안)</h2>
+  <div class="card">
+    <div class="table-wrap"><table>
+      <tr><th>주차</th><th class="l">주제</th><th class="l">실습</th></tr>
+      <tr><td>1</td><td class="l">이동평균선 · 추세</td><td class="l">관심 종목 3개의 이평선 배열과 200일선 위치 확인</td></tr>
+      <tr><td>2</td><td class="l">RSI · 스토캐스틱</td><td class="l">최근 과매도 신호 후 20일 수익률 기록</td></tr>
+      <tr><td>3</td><td class="l">볼린저밴드 · ATR</td><td class="l">스퀴즈 종목 찾기, ATR로 손절선 계산</td></tr>
+      <tr><td>4</td><td class="l">MACD · 거래량 · 지표 조합</td><td class="l">나만의 체크리스트 초안 작성</td></tr>
+      <tr><td>5</td><td class="l">매크로: 금리 · 물가</td><td class="l">CPI 발표일 시장 반응 기록</td></tr>
+      <tr><td>6</td><td class="l">밸류에이션 · 실적 시즌</td><td class="l">AI 종목 PER·예상 PER 비교, 실적 발표 1개 분석</td></tr>
+      <tr><td>7</td><td class="l">수급 · 환율 · 섹터 로테이션</td><td class="l">외국인 순매수 상위 종목과 환율 관계</td></tr>
+      <tr><td>8</td><td class="l">리스크 관리 · 백테스트</td><td class="l">체크리스트를 백테스트 결과로 수정, 모의 포트폴리오 운영</td></tr>
+    </table></div>
+  </div>
+
+  <h2 id="glossary">📖 용어집</h2>
+  <div id="gloss"></div>
+</main>
+<script src="assets/app.js"></script>
+<script>
+  const G = [
+    ["CPI / 근원 CPI", "소비자물가지수. 근원은 변동이 큰 에너지·식품을 뺀 것."],
+    ["PCE", "개인소비지출 물가. 연준이 공식 물가 목표(2%)에 쓰는 지표."],
+    ["FOMC", "연방공개시장위원회. 미국 기준금리를 정하는 회의(연 8회)."],
+    ["bp (베이시스 포인트)", "0.01%p. 25bp 인상 = 0.25%p 인상."],
+    ["국채 수익률", "채권 가격과 반대로 움직임. 수익률 상승 = 채권 가격 하락."],
+    ["장단기 금리차 역전", "단기 금리가 장기 금리보다 높아진 상태. 경기침체 선행 신호로 유명."],
+    ["달러 인덱스 (DXY)", "유로·엔·파운드 등 6개 통화 대비 달러 가치."],
+    ["CapEx", "설비투자. AI에서는 데이터센터·GPU 구매 비용."],
+    ["HBM", "고대역폭 메모리. GPU 옆에 쌓아 올리는 AI용 D램."],
+    ["하이퍼스케일러", "초대형 클라우드 사업자 (MS, 아마존, 구글, 메타 등)."],
+    ["컨센서스", "애널리스트 예상치 평균."],
+    ["가이던스", "회사가 제시하는 다음 분기·연도 실적 전망."],
+    ["MDD", "최대 낙폭. 고점에서 저점까지 가장 크게 떨어진 비율."],
+    ["서킷브레이커", "지수가 급락할 때 거래를 일시 정지하는 제도. 한국은 8%·15%·20% 하락 시 단계적으로 발동."],
+    ["약세장 / 강세장", "고점 대비 -20% 이하 하락이면 약세장, 저점 대비 +20% 이상이면 강세장."],
+    ["휩소 (Whipsaw)", "신호가 나왔다가 곧바로 반대로 움직여 손실을 내는 가짜 신호."],
+    ["다이버전스", "가격과 지표가 반대 방향으로 움직이는 현상. 추세 전환의 신호."],
+    ["숏커버링", "공매도한 투자자가 주식을 되사면서 생기는 급반등."],
+  ];
+  document.getElementById("gloss").innerHTML = G.map(([k, v]) => `<details><summary>${k}</summary><p>${v}</p></details>`).join("");
+
+  function calc() {
+    const v = (id) => +document.getElementById(id).value;
+    const cap = v("k-cap"), risk = v("k-risk") / 100, entry = v("k-entry"), stop = v("k-stop");
+    const out = document.getElementById("k-out");
+    if (!(cap > 0 && entry > stop && stop > 0)) { out.innerHTML = "손절가는 매수가보다 낮아야 합니다."; return; }
+    const loss = cap * risk, per = entry - stop, qty = Math.floor(loss / per), amt = qty * entry;
+    out.innerHTML = `최대 손실 <b>${App.num(loss, 0)}원</b> ÷ 주당 손실 ${App.num(per, 0)}원 → 매수 수량 <b>${App.num(qty, 0)}주</b>
+      (매수 금액 ${App.num(amt, 0)}원, 총 투자금의 <b>${App.num(amt / cap * 100, 1)}%</b>)
+      <div class="t-sub">손절가까지 떨어져도 총 투자금의 ${App.num(risk * 100, 1)}%만 잃도록 맞춘 수량입니다.</div>`;
+  }
+  document.querySelectorAll(".calc input").forEach((i) => i.oninput = calc);
+  calc();
+</script>
+</body>
+</html>

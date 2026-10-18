@@ -1,0 +1,83 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>시황 · 뉴스</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css">
+<link rel="stylesheet" href="assets/style.css">
+</head>
+<body>
+<main>
+  <div class="page-head">
+    <div>
+      <h1>주간 시황 · 뉴스</h1>
+      <p class="subtitle" id="week"></p>
+    </div>
+    <div class="stamp"></div>
+  </div>
+
+  <div class="card" style="margin-top:12px">
+    <h2 id="headline" style="margin:0 0 .3rem"></h2>
+    <p id="oneliner" class="subtitle"></p>
+  </div>
+
+  <h2>🧭 시황 요약</h2>
+  <div class="grid g3" id="summary"></div>
+
+  <h2>📈 기간별 수익률</h2>
+  <div class="card">
+    <div class="table-wrap"><table id="perf"></table></div>
+    <p class="t-sub" style="margin-top:8px">52주 고점 대비: 현재가가 최근 1년 최고가보다 몇 % 아래에 있는지. -20% 이하이면 흔히 '약세장(bear market)'이라고 부릅니다.</p>
+  </div>
+
+  <div class="grid g2" style="margin-top:2rem">
+    <div class="card">
+      <h3>📰 이번 주 핵심 뉴스</h3>
+      <div id="news"></div>
+    </div>
+    <div>
+      <div class="card">
+        <h3>📅 다음 일정</h3>
+        <div class="table-wrap"><table id="calendar"></table></div>
+      </div>
+      <div class="card" style="margin-top:12px">
+        <h3>🔎 뉴스 읽는 습관</h3>
+        <ul class="clean">
+          <li><b>숫자 vs 예상치</b>: 지표는 '좋다/나쁘다'보다 <b>예상 대비</b> 얼마나 달랐는지가 주가를 움직입니다.</li>
+          <li><b>원인 → 금리 → 밸류에이션</b>: 뉴스가 금리 기대를 바꾸는지부터 생각하세요.</li>
+          <li><b>1차 출처</b>: 연준·한은 보도자료, 기업 IR 자료, BLS(미국 노동통계국) 원문을 확인하는 습관.</li>
+          <li><b>이미 반영됐나?</b>: 모두가 아는 뉴스는 가격에 이미 들어가 있을 가능성이 큽니다 ("소문에 사고 뉴스에 판다").</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</main>
+<script src="assets/app.js"></script>
+<script>
+(async () => {
+  const [m, w] = await Promise.all([App.load("data/market.json"), App.loadOpt("content/weekly/latest.json")]);
+  const $ = (id) => document.getElementById(id);
+  const order = ["index", "fx", "rate", "commodity", "ai"];
+  const label = { index: "지수", fx: "환율", rate: "금리", commodity: "원자재", ai: "AI 종목" };
+  const rows = Object.values(m).sort((a, b) => order.indexOf(a.group) - order.indexOf(b.group));
+  $("perf").innerHTML = `<tr><th>구분</th><th class="l">자산</th><th>현재</th><th>1D</th><th>1W</th><th>1M</th><th>3M</th><th>YTD</th><th>52주 고점 대비</th></tr>` +
+    rows.map((v) => `<tr><td class="t-sub">${label[v.group]}</td><td class="l">${v.name}</td><td>${App.smart(v.last)}</td>
+      <td>${App.chg(v.chg1d)}</td><td>${App.chg(v.chg1w)}</td><td>${App.chg(v.chg1m)}</td><td>${App.chg(v.chg3m)}</td><td>${App.chg(v.ytd)}</td>
+      <td>${App.chg((v.last / v.high52 - 1) * 100)}</td></tr>`).join("");
+
+  if (!w) { $("summary").innerHTML = `<p class="empty">아직 주간 글이 없습니다.</p>`; return; }
+  $("week").textContent = w.week;
+  $("headline").textContent = w.headline;
+  $("oneliner").textContent = w.one_liner;
+  $("summary").innerHTML = w.market_summary.map((s) => `<div class="card"><h3>${App.esc(s.title)}</h3><p>${App.esc(s.body)}</p></div>`).join("");
+  $("news").innerHTML = w.news.map((n) => `<div class="news-item">
+      <a href="${App.esc(n.url)}" target="_blank" rel="noopener"><b>${App.esc(n.title)}</b></a>
+      <div class="src">${App.esc(n.source)}</div>
+      <p style="margin:.3rem 0 0">${App.esc(n.why_it_matters)}</p></div>`).join("");
+  $("calendar").innerHTML = `<tr><th>날짜</th><th class="l">이벤트</th><th class="l">왜 중요?</th></tr>` +
+    w.calendar.map((c) => `<tr><td>${App.esc(c.date)}</td><td class="l"><b>${App.esc(c.event)}</b></td><td class="l t-sub">${App.esc(c.why)}</td></tr>`).join("");
+})();
+</script>
+</body>
+</html>

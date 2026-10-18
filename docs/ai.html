@@ -1,0 +1,127 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>AI 섹터 분석</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css">
+<link rel="stylesheet" href="assets/style.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<style>
+  .chain { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 170px), 1fr)); gap: 8px; align-items: stretch; }
+  .chain .step { background: var(--surface-2); border-radius: 10px; padding: 12px; position: relative; }
+  .chain .step b { display: block; }
+  .chain .step .t-sub { display: block; margin-top: 4px; }
+  .chain .step .tickers { margin-top: 6px; font-size: .82rem; color: var(--accent); }
+</style>
+</head>
+<body>
+<main>
+  <div class="page-head">
+    <div>
+      <h1>AI 섹터 분석</h1>
+      <p class="subtitle">지금 시장을 주도하는 AI 밸류체인을 따라가며 보기</p>
+    </div>
+    <div class="stamp"></div>
+  </div>
+
+  <div class="card" style="margin-top:12px">
+    <span class="pill info">이번 주 AI 섹터</span>
+    <p id="ai-summary" style="margin-top:.6rem;font-weight:600"></p>
+    <p id="ai-wl" class="subtitle"></p>
+  </div>
+
+  <h2>🔗 AI 밸류체인: 돈은 어디서 어디로 흐르나</h2>
+  <div class="card">
+    <div class="chain">
+      <div class="step"><b>① 수요 (서비스·모델)</b><span class="t-sub">ChatGPT, Gemini, 기업용 AI. 최종 매출이 여기서 나옴</span><div class="tickers">OpenAI(비상장), META, GOOGL</div></div>
+      <div class="step"><b>② 클라우드 (하이퍼스케일러)</b><span class="t-sub">데이터센터를 짓는 데 매년 수천억 달러 CapEx 투자</span><div class="tickers">MSFT, AMZN, GOOGL, META</div></div>
+      <div class="step"><b>③ AI 반도체 설계</b><span class="t-sub">GPU·맞춤형 칩(ASIC). CapEx의 가장 큰 몫</span><div class="tickers">NVDA, AMD, AVGO</div></div>
+      <div class="step"><b>④ 메모리 (HBM)</b><span class="t-sub">GPU 옆에 붙는 고대역폭 메모리. 한국이 강한 영역</span><div class="tickers">SK하이닉스, 삼성전자</div></div>
+      <div class="step"><b>⑤ 파운드리·장비</b><span class="t-sub">칩을 실제로 만드는 곳</span><div class="tickers">TSM (+ ASML 등 장비주)</div></div>
+      <div class="step"><b>⑥ 전력·인프라</b><span class="t-sub">데이터센터 전력, 냉각, 전력망</span><div class="tickers">전력기기·유틸리티 (확장 학습)</div></div>
+    </div>
+    <div class="callout tip"><b>핵심 논리</b>①에서 돈을 벌어야 ②가 투자를 계속하고, ②의 CapEx가 ③④⑤의 매출이 됩니다. 그래서 <b>빅테크 실적 발표의 CapEx 가이던스</b>가 반도체주에 가장 중요한 지표입니다. 위쪽(①)이 흔들리면 아래쪽 전체가 흔들립니다.</div>
+  </div>
+
+  <h2>🧩 이번 주 테마</h2>
+  <div class="grid g2" id="themes"></div>
+
+  <h2>📋 AI 종목 한눈에</h2>
+  <div class="card">
+    <div class="table-wrap"><table id="tbl"></table></div>
+    <p class="t-sub" style="margin-top:8px">PER = 주가 ÷ 주당순이익(최근 12개월). 예상 PER = 향후 12개월 예상 이익 기준. <b>예상 PER이 현재 PER보다 훨씬 낮다</b>는 것은 시장이 이익이 크게 늘 것으로 본다는 뜻이고, 그 기대가 꺾이면 주가가 크게 흔들립니다. 점수 = <a href="indicators.html#checklist">매수 체크리스트</a>.</p>
+  </div>
+
+  <h2>📉 상대 성과 (시작일 = 100)</h2>
+  <div class="card">
+    <div class="seg" id="range" style="margin-bottom:10px">
+      <button data-d="22">1개월</button><button data-d="66" class="on">3개월</button><button data-d="252">1년</button><button data-d="756">3년</button>
+    </div>
+    <div class="chart-box tall"><canvas id="c-rel"></canvas></div>
+  </div>
+
+  <div class="grid g2" style="margin-top:2rem">
+    <div class="card"><h3>⚠️ 리스크</h3><ul class="clean" id="risks"></ul></div>
+    <div class="card"><h3>👀 앞으로 확인할 것</h3><ul class="clean" id="watch"></ul></div>
+  </div>
+
+  <h2>🎓 AI 투자를 공부할 때 보는 지표</h2>
+  <div class="grid g3">
+    <div class="card flat"><h3>하이퍼스케일러 CapEx</h3><p>MS·구글·아마존·메타의 분기 설비투자액과 다음 해 가이던스. 반도체 수요의 <b>선행지표</b>입니다.</p></div>
+    <div class="card flat"><h3>엔비디아 데이터센터 매출</h3><p>AI 수요를 가장 직접 보여주는 숫자. 성장률 자체보다 <b>시장 예상 대비</b>와 다음 분기 가이던스가 중요합니다.</p></div>
+    <div class="card flat"><h3>HBM·DRAM 가격</h3><p>메모리는 사이클 산업입니다. 가격이 오르면 SK하이닉스·삼성 이익이 크게 늘고, 공급이 과잉되면 반대가 됩니다. 중국 업체(CXMT)의 공급 확대도 변수입니다.</p></div>
+    <div class="card flat"><h3>한국 반도체 수출</h3><p>매월 1일 발표하는 수출입 통계. KOSPI와 상관관계가 매우 높습니다.</p></div>
+    <div class="card flat"><h3>AI 기업 매출·ROI</h3><p>OpenAI 등 모델 기업의 매출, 기업들의 AI 유료 도입률. "투자 대비 돈을 버는가"에 대한 답입니다.</p></div>
+    <div class="card flat"><h3>금리 (미 10년물)</h3><p>고성장주는 미래 이익 비중이 커서 금리에 민감합니다. 같은 실적이라도 금리가 오르면 적정 PER이 낮아집니다.</p></div>
+  </div>
+</main>
+<script src="assets/app.js"></script>
+<script>
+(async () => {
+  const [m, sig, w] = await Promise.all([App.load("data/market.json"), App.load("data/signals.json"), App.loadOpt("content/weekly/latest.json")]);
+  const $ = (id) => document.getElementById(id);
+  const ai = Object.entries(m).filter(([, v]) => v.group === "ai");
+
+  if (w?.ai_sector) {
+    const a = w.ai_sector;
+    $("ai-summary").textContent = a.summary;
+    $("ai-wl").textContent = a.winners_losers;
+    $("themes").innerHTML = a.themes.map((t) => `<div class="card"><h3>${App.esc(t.title)}</h3><p>${App.esc(t.body)}</p></div>`).join("");
+    $("risks").innerHTML = a.risks.map((r) => `<li>${App.esc(r)}</li>`).join("");
+    $("watch").innerHTML = a.watch.map((r) => `<li>${App.esc(r)}</li>`).join("");
+  }
+
+  $("tbl").innerHTML = `<tr><th class="l">종목</th><th class="l">밸류체인</th><th>종가</th><th>1W</th><th>1M</th><th>YTD</th><th>PER</th><th>예상 PER</th><th>시가총액</th><th>RSI</th><th>점수</th></tr>` +
+    ai.map(([s, v]) => {
+      const g = sig.items[s] || {};
+      const cur = v.currency === "KRW" ? "원" : "$";
+      return `<tr><td class="l"><b>${v.name}</b> <span class="t-sub">${s}</span></td><td class="l t-sub">${v.layer || ""}</td>
+        <td>${App.smart(v.last)}</td><td>${App.chg(v.chg1w)}</td><td>${App.chg(v.chg1m)}</td><td>${App.chg(v.ytd)}</td>
+        <td>${v.per ? App.num(v.per, 1) : "-"}</td><td>${v.fwd_per ? App.num(v.fwd_per, 1) : "-"}</td>
+        <td>${v.mcap ? (cur === "$" ? "$" + App.num(v.mcap / 1e9, 0) + "B" : App.bigNum(v.mcap) + "원") : "-"}</td>
+        <td>${g.rsi ?? "-"}</td><td><b>${g.score ?? "-"}</b></td></tr>`;
+    }).join("");
+
+  const files = await Promise.all(ai.map(([, v]) => App.load(`data/prices/${v.file}.json`)));
+  let chart;
+  function draw(days) {
+    chart?.destroy();
+    chart = App.lineChart($("c-rel"), files.map((f) => {
+      const rows = f.rows.slice(-days), base = rows[0][4];
+      return { label: f.name, points: rows.map((r) => [r[0], (r[4] / base) * 100]) };
+    }), { options: {} });
+    const pal = ["#3b5bdb", "#d6336c", "#e8890c", "#1c7ed6", "#2f9e44", "#7048e8", "#0ca678", "#f76707", "#c2255c", "#495057"];
+    chart.data.datasets.forEach((d, i) => d.borderColor = pal[i % pal.length]);
+    chart.options.plugins.legend.position = "bottom";
+    chart.update();
+  }
+  document.querySelectorAll("#range button").forEach((b) => b.onclick = () => {
+    document.querySelectorAll("#range button").forEach((x) => x.classList.toggle("on", x === b));
+    draw(+b.dataset.d);
+  });
+  draw(66);
+})();
+</script>
+</body>
+</html>

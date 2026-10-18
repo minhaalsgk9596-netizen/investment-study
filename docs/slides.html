@@ -1,0 +1,197 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>주간 발표 슬라이드</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/5.1.0/reveal.min.css">
+<link rel="stylesheet" href="assets/style.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/5.1.0/reveal.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/5.1.0/plugin/notes/notes.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<style>
+  body { background: var(--bg); }
+  .reveal { font-family: var(--font); color: var(--text); font-size: 30px; }
+  .reveal .slides { text-align: left; }
+  .reveal .slides section { height: 100%; padding: 10px 20px; }
+  .reveal h1, .reveal h2, .reveal h3 { font-family: var(--font); color: var(--text); text-transform: none; letter-spacing: -.02em; font-weight: 800; }
+  .reveal h1 { font-size: 2.1em; line-height: 1.2; }
+  .reveal h2 { font-size: 1.45em; margin: 0 0 .6em; }
+  .reveal h3 { font-size: 1em; margin: 0 0 .3em; }
+  .reveal p, .reveal li { line-height: 1.5; }
+  .reveal ul { margin-left: 1em; }
+  .reveal li { margin: .25em 0; }
+  .reveal table { font-size: .68em; margin: 0; width: 100%; }
+  .reveal table th, .reveal table td { border-bottom: 1px solid var(--border); padding: .35em .6em; }
+  .reveal .card { font-size: .7em; }
+  .reveal .kicker { color: var(--accent); font-weight: 700; font-size: .6em; letter-spacing: .05em; margin-bottom: .4em; }
+  .reveal .muted { color: var(--muted); }
+  .reveal .small { font-size: .62em; }
+  .reveal .grid { gap: 14px; }
+  .reveal .g2s { grid-template-columns: 1fr 1fr; }
+  .reveal .g3s { grid-template-columns: repeat(3, 1fr); }
+  .reveal .g4s { grid-template-columns: repeat(4, 1fr); }
+  .reveal .tile .t-val { font-size: 1.6em; }
+  .reveal .big-quote { font-size: 1.15em; font-weight: 700; border-left: 6px solid var(--accent); padding-left: .7em; margin: .6em 0 1em; }
+  .reveal .chart-s { position: relative; height: 430px; }
+  .reveal .progress { color: var(--accent); }
+  .reveal .controls { color: var(--accent); }
+  .reveal .slide-number { background: transparent; color: var(--muted); font-family: var(--font); }
+  .reveal a { color: var(--accent); }
+  .foot { position: absolute; bottom: 0; left: 20px; font-size: .45em; color: var(--muted); }
+  .print-hint { position: fixed; right: 12px; top: 10px; z-index: 30; font-size: 12px; color: var(--muted); }
+  .print-hint a { color: var(--muted); }
+  @media print { .print-hint { display: none; } }
+</style>
+</head>
+<body data-no-shell>
+<div class="print-hint"><a href="index.html">← 사이트</a> · <a href="?print-pdf" target="_blank">PDF로 저장</a> · S = 발표자 노트 · F = 전체화면</div>
+<div class="reveal"><div class="slides" id="slides"></div></div>
+<script src="assets/app.js"></script>
+<script>
+const LESSON = {
+  rsi: { name: "RSI (상대강도지수)", key: "rsi", unit: "", lines: [70, 30],
+    points: ["최근 14일 상승폭 vs 하락폭 → 0~100", "70 이상 과매수 · 30 이하 과매도 · 50 = 힘의 균형",
+      "30 아래에서 사기보다 30을 다시 넘을 때가 더 보수적", "하락 추세에서는 과매도가 오래 지속 → 추세 필터와 같이 쓰기"] },
+  ma: { name: "이동평균선", key: "dist_sma200", unit: "%", lines: [0],
+    points: ["N일 종가 평균 → 추세 방향", "정배열(5>20>60>120) = 상승 추세, 200일선 = 장기 추세 기준",
+      "골든크로스·데드크로스는 후행 신호", "횡보장에서는 휩소(가짜 신호)가 잦음"] },
+  bb: { name: "볼린저밴드", key: "bb_pctb", unit: "", lines: [1, 0],
+    points: ["20일 평균 ± 2 표준편차", "%B 0 = 하단, 1 = 상단", "하단 이탈 후 복귀 = 반등 신호, 스퀴즈 = 큰 움직임 예고",
+      "강한 추세에선 밴드를 타고 움직임 → 방향 먼저 확인"] },
+  macd: { name: "MACD", key: "macd_gap", unit: "", lines: [0],
+    points: ["EMA12 − EMA26 = MACD, MACD의 EMA9 = 시그널", "시그널 상향 교차 = 매수, 하향 교차 = 매도",
+      "히스토그램 축소 = 추세 힘 약화", "0선 위에서 나온 교차가 더 신뢰도 높음"] },
+  stoch: { name: "스토캐스틱", key: "stoch_k", unit: "", lines: [80, 20],
+    points: ["14일 고가~저가 중 현재 위치 (0~100)", "80 과매수 · 20 과매도", "과매도에서 %K가 %D 상향 교차 = 매수 신호",
+      "민감해서 가짜 신호가 많음 → 주봉과 함께"] },
+};
+
+(async () => {
+  const [m, macro, sig, w] = await Promise.all([
+    App.load("data/market.json"), App.load("data/macro.json"), App.load("data/signals.json"), App.loadOpt("content/weekly/latest.json"),
+  ]);
+  const E = App.esc, N = App.num;
+  const by = (g) => Object.entries(m).filter(([, v]) => v.group === g);
+  const note = (t) => `<aside class="notes">${E(t)}</aside>`;
+  const foot = `<div class="foot">학습용 자료 · 투자 권유 아님 · 데이터 ${E(m["^GSPC"]?.date ?? "")} 기준</div>`;
+  const S = [];
+
+  // 1. 표지
+  S.push(`<section data-background-color="var(--surface)">
+    <div class="kicker">투자 스터디 · 주간 브리핑</div>
+    <h1>${E(w?.week ?? "")}</h1>
+    <p class="muted" style="font-size:.8em">${E(w?.headline ?? "")}</p>
+    <p class="muted small" style="margin-top:2em">${E(w?.date ?? "")} 작성</p>
+    ${note("오늘 순서: 한 줄 요약 → 지수 → 금리·환율 → 물가·고용 → 뉴스 → AI 섹터 → 보조지표 시그널 → 지표 공부 → 일정 → 토론")}</section>`);
+
+  // 2. 한 줄 요약
+  S.push(`<section><div class="kicker">SUMMARY</div><h2>이번 주 한 줄</h2>
+    <div class="big-quote">${E(w?.slides?.one_liner ?? w?.one_liner ?? "")}</div>
+    <ul>${(w?.slides?.key_points ?? []).map((p) => `<li class="fragment">${E(p)}</li>`).join("")}</ul>${foot}
+    ${note(w?.one_liner ?? "")}</section>`);
+
+  // 3. 지수 성과
+  const idxRows = by("index").map(([, v]) => `<tr><td>${v.name}</td><td>${App.smart(v.last)}</td><td>${App.chg(v.chg1d)}</td><td>${App.chg(v.chg1w)}</td><td>${App.chg(v.chg1m)}</td><td>${App.chg(v.ytd)}</td><td>${App.chg((v.last / v.high52 - 1) * 100)}</td></tr>`).join("");
+  const ks = m["^KS11"], sox = m["^SOX"];
+  S.push(`<section><div class="kicker">MARKETS</div><h2>한·미 지수 성과</h2>
+    <table><tr><th>지수</th><th>현재</th><th>1D</th><th>1W</th><th>1M</th><th>YTD</th><th>52주 고점 대비</th></tr>${idxRows}</table>
+    <div class="grid g3s" style="margin-top:20px">${(w?.market_summary ?? []).map((s) => `<div class="card"><h3>${E(s.title)}</h3></div>`).join("")}</div>${foot}
+    ${note(`KOSPI 주간 ${N(ks?.chg1w, 1)}%, 반도체지수 주간 ${N(sox?.chg1w, 1)}%. ` + (w?.market_summary ?? []).map((s) => s.body).join(" "))}</section>`);
+
+  // 4. 금리·환율·달러
+  const tiles = [...by("fx"), ...by("rate"), ...by("commodity")].map(([s, v]) => App.tile(v, { unit: s === "^TNX" ? "%" : "" })).join("");
+  S.push(`<section><div class="kicker">RATES · FX · COMMODITIES</div><h2>금리 · 환율 · 원자재</h2>
+    <div class="grid g3s">${tiles}</div>${foot}
+    ${note("10년물 금리가 오르면 주식의 할인율이 높아져 고PER 성장주에 불리. 원/달러 하락 = 원화 강세. 유가는 물가로 연결.")}</section>`);
+
+  // 5. 물가·고용
+  const mt = (id, unit = "%") => { const x = macro[id]; if (!x) return "";
+    const d = x.prev == null ? 0 : x.last - x.prev;
+    return `<div class="card tile"><div class="t-name">${x.name}</div><div class="t-val">${N(x.last, id === "PAYEMS" ? 0 : 2)}${unit}</div>
+      <div class="t-chg"><span class="${d > 0 ? "up" : d < 0 ? "down" : "flat-c"}">${d > 0 ? "▲" : d < 0 ? "▼" : ""}${N(Math.abs(d), 2)}</span> <span class="t-sub">직전 대비 · ${x.date.slice(0, 7)}</span></div></div>`; };
+  S.push(`<section><div class="kicker">MACRO</div><h2>물가 · 금리 정책 · 고용</h2>
+    <div class="grid g4s">${["CPIAUCNS", "CPILFENS", "PCEPILFE", "DFF", "UNRATE", "PAYEMS", "KR_CPI", "KR_BASE_RATE"].map((id) => mt(id, id === "PAYEMS" ? "천 명" : "%")).join("")}</div>
+    <p class="small muted" style="margin-top:14px">${E(w?.macro_view?.summary ?? "")}</p>${foot}
+    ${note((w?.macro_view?.points ?? []).join(" / "))}</section>`);
+
+  // 6. 뉴스
+  S.push(`<section><div class="kicker">NEWS</div><h2>핵심 뉴스 3</h2>
+    ${(w?.news ?? []).slice(0, 3).map((n) => `<div class="card fragment" style="margin-bottom:12px"><h3>${E(n.title)} <span class="t-sub">— ${E(n.source)}</span></h3><p style="margin:0">${E(n.why_it_matters)}</p></div>`).join("")}${foot}
+    ${note((w?.news ?? []).slice(3).map((n) => `${n.title}: ${n.why_it_matters}`).join(" / "))}</section>`);
+
+  // 7. AI 테마
+  S.push(`<section><div class="kicker">AI SECTOR</div><h2>AI 섹터: 이번 주 테마</h2>
+    <div class="grid g2s">${(w?.ai_sector?.themes ?? []).map((t) => `<div class="card"><h3>${E(t.title)}</h3><p style="margin:0">${E(t.body)}</p></div>`).join("")}</div>${foot}
+    ${note((w?.ai_sector?.summary ?? "") + " " + (w?.ai_sector?.winners_losers ?? ""))}</section>`);
+
+  // 8. AI 종목 성과 차트
+  S.push(`<section><div class="kicker">AI SECTOR</div><h2>AI 종목 성과 (1주 · 1개월)</h2>
+    <div class="chart-s"><canvas id="ai-bar"></canvas></div>${foot}
+    ${note("밸류체인 아래(메모리·칩)일수록 변동성이 크다. 실적 발표 전 CapEx 가이던스에 주목.")}</section>`);
+
+  // 9. 보조지표 시그널
+  const pool = Object.entries(sig.items).filter(([s, v]) => ["ai", "index"].includes(v.group) && s !== "^VIX").sort((a, b) => b[1].score - a[1].score);
+  const sigRow = ([, v]) => `<tr><td>${v.name}</td><td><b>${v.score}</b></td><td>${N(v.rsi, 1)}</td><td>${App.chg(v.dist_sma200)}</td><td class="l small">${v.signals.slice(0, 2).map((s) => E(s.text)).join(" · ") || "-"}</td></tr>`;
+  S.push(`<section><div class="kicker">TECHNICALS</div><h2>보조지표 시그널: 체크리스트 점수</h2>
+    <div class="grid g2s">
+      <div><h3 class="up">상위 5</h3><table><tr><th>종목</th><th>점수</th><th>RSI</th><th>200일선</th><th class="l">신호</th></tr>${pool.slice(0, 5).map(sigRow).join("")}</table></div>
+      <div><h3 class="down">하위 5</h3><table><tr><th>종목</th><th>점수</th><th>RSI</th><th>200일선</th><th class="l">신호</th></tr>${pool.slice(-5).reverse().map(sigRow).join("")}</table></div>
+    </div>
+    <p class="small muted" style="margin-top:12px">점수 = 200일선·정배열·RSI 눌림·MACD·스토캐스틱·%B·OBV 조건 충족도 (100점 만점). 매수 추천이 아니라 조건 점검표입니다.</p>${foot}
+    ${note("점수가 낮다고 나쁜 종목이 아니라 '지금 추세·타이밍 조건이 안 맞는다'는 뜻. 하락장에서는 대부분 낮게 나옴.")}</section>`);
+
+  // 10. 지표 깊게 보기
+  const L = LESSON[w?.slides?.deep_dive_indicator] || LESSON.rsi;
+  S.push(`<section><div class="kicker">STUDY</div><h2>지표 깊게 보기: ${L.name}</h2>
+    <div class="grid g2s"><div><ul>${L.points.map((p) => `<li class="fragment">${E(p)}</li>`).join("")}</ul></div>
+    <div class="chart-s" style="height:400px"><canvas id="lesson-bar"></canvas></div></div>${foot}
+    ${note("오른쪽은 이번 주 실제 값. 과매도 종목이 많다고 바로 사는 게 아니라 추세 필터를 같이 봐야 함. 사이트 보조지표 페이지의 백테스트 결과도 같이 보여주기.")}</section>`);
+
+  // 11. 일정
+  S.push(`<section><div class="kicker">CALENDAR</div><h2>다가오는 일정</h2>
+    <table><tr><th>날짜</th><th class="l">이벤트</th><th class="l">왜 중요?</th></tr>
+    ${(w?.calendar ?? []).map((c) => `<tr><td>${E(c.date)}</td><td class="l"><b>${E(c.event)}</b></td><td class="l">${E(c.why)}</td></tr>`).join("")}</table>
+    <div class="grid g2s" style="margin-top:20px"><div class="card"><h3>⚠️ 리스크</h3><ul>${(w?.ai_sector?.risks ?? []).map((r) => `<li>${E(r)}</li>`).join("")}</ul></div>
+    <div class="card"><h3>👀 확인할 것</h3><ul>${(w?.ai_sector?.watch ?? []).map((r) => `<li>${E(r)}</li>`).join("")}</ul></div></div>${foot}</section>`);
+
+  // 12. 토론
+  S.push(`<section><div class="kicker">DISCUSSION</div><h2>토론 질문</h2>
+    <ol>${(w?.study_questions ?? []).map((q) => `<li class="fragment">${E(q)}</li>`).join("")}</ol>${foot}</section>`);
+
+  document.getElementById("slides").innerHTML = S.join("");
+
+  await Reveal.initialize({ hash: true, slideNumber: "c/t", plugins: [RevealNotes], width: 1280, height: 720, margin: 0.05, transition: "slide", pdfSeparateFragments: false });
+
+  Chart.defaults.font.family = App.css("--font");
+  Chart.defaults.color = App.css("--muted");
+  Chart.defaults.borderColor = App.css("--border");
+  Chart.defaults.maintainAspectRatio = false;
+  Chart.defaults.font.size = 15;
+
+  const ai = by("ai").sort((a, b) => a[1].chg1w - b[1].chg1w);
+  new Chart(document.getElementById("ai-bar"), {
+    type: "bar",
+    data: { labels: ai.map(([, v]) => v.name), datasets: [
+      { label: "1주 %", data: ai.map(([, v]) => v.chg1w), backgroundColor: ai.map(([, v]) => v.chg1w >= 0 ? App.css("--up") : App.css("--down")) },
+      { label: "1개월 %", data: ai.map(([, v]) => v.chg1m), backgroundColor: App.css("--border") },
+    ] },
+    options: { indexAxis: "y", animation: false, plugins: { legend: { position: "bottom" } }, scales: { x: { ticks: { callback: (v) => v + "%" } } } },
+  });
+
+  const items = Object.values(sig.items).filter((v) => ["ai", "index"].includes(v.group) && v.name.indexOf("VIX") < 0)
+    .map((v) => ({ name: v.name, val: L.key === "macd_gap" ? v.macd - v.macd_signal : v[L.key] }))
+    .filter((x) => x.val != null).sort((a, b) => a.val - b.val);
+  const hi = Math.max(...L.lines), lo = Math.min(...L.lines);
+  new Chart(document.getElementById("lesson-bar"), {
+    type: "bar",
+    data: { labels: items.map((x) => x.name), datasets: [{ label: `${L.name} 현재 값${L.unit ? " (" + L.unit + ")" : ""}`, data: items.map((x) => x.val),
+      // 기준선 아래(과매도·약세) = 파랑, 위(과열·강세) = 빨강
+      backgroundColor: items.map((x) => x.val < lo ? App.css("--down") : x.val > hi ? App.css("--up") : App.css("--muted")) }] },
+    options: { indexAxis: "y", animation: false, plugins: { legend: { position: "bottom" } } },
+  });
+})();
+</script>
+</body>
+</html>

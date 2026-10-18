@@ -1,0 +1,66 @@
+# 시세·매크로 데이터를 새로 받아 GitHub Pages 로 배포한다.
+# - 평일 07:30 KST (미국 장 마감 후), 16:30 KST (한국 장 마감 후)
+# - content/ 나 docs/ 가 푸시되면 (예: 매주 Claude 루틴이 글을 올리면) 바로 재배포
+# - Actions 탭에서 수동 실행 가능
+name: update-data
+
+on:
+  schedule:
+    - cron: "30 22 * * 0-4"   # UTC 일~목 22:30 = KST 월~금 07:30
+    - cron: "30 7 * * 1-5"    # UTC 월~금 07:30 = KST 월~금 16:30
+  push:
+    branches: [main]
+    paths: ["content/**", "docs/**", "scripts/**", ".github/workflows/**"]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+          cache-dependency-path: scripts/requirements.txt
+
+      - name: Install
+        run: pip install -r scripts/requirements.txt
+
+      - name: Fetch data
+        env:
+          ECOS_API_KEY: ${{ secrets.ECOS_API_KEY }}
+        run: |
+          python scripts/fetch_data.py
+          python scripts/indicators.py
+
+      - name: Assemble site
+        run: |
+          mkdir -p _site
+          cp -r docs/. _site/
+          cp -r data content _site/
+          touch _site/.nojekyll
+
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: _site
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v4

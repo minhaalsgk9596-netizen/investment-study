@@ -1,0 +1,50 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>지난 주차 모음</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css">
+<link rel="stylesheet" href="assets/style.css">
+</head>
+<body>
+<main>
+  <div class="page-head">
+    <div>
+      <h1>지난 주차 모음</h1>
+      <p class="subtitle">매주 작성된 시황·AI 분석 기록. 지난 예상이 맞았는지 복기해 보세요.</p>
+    </div>
+    <div class="stamp"></div>
+  </div>
+  <div id="list" style="margin-top:12px"></div>
+</main>
+<script src="assets/app.js"></script>
+<script>
+(async () => {
+  const idx = (await App.loadOpt("content/weekly/index.json")) || [];
+  const el = document.getElementById("list");
+  if (!idx.length) { el.innerHTML = `<p class="empty">아직 기록이 없습니다.</p>`; return; }
+  const E = App.esc;
+  el.innerHTML = idx.map((w, i) => `<details data-date="${E(w.date)}" ${i === 0 ? "open" : ""}>
+    <summary>${E(w.date)} · ${E(w.headline)}</summary><div class="body"><p class="empty">불러오는 중…</p></div></details>`).join("");
+  async function fill(d) {
+    const body = d.querySelector(".body");
+    if (body.dataset.done) return;
+    const w = await App.loadOpt(`content/weekly/${d.dataset.date}.json`);
+    if (!w) { body.innerHTML = `<p class="empty">파일을 찾을 수 없습니다.</p>`; return; }
+    body.dataset.done = 1;
+    body.innerHTML = `<p class="subtitle">${E(w.week)} — ${E(w.one_liner)}</p>
+      <h3>시황</h3>${w.market_summary.map((s) => `<p><b>${E(s.title)}</b> ${E(s.body)}</p>`).join("")}
+      <h3>매크로</h3><p>${E(w.macro_view.summary)}</p><ul class="clean">${w.macro_view.points.map((p) => `<li>${E(p)}</li>`).join("")}</ul>
+      <h3>AI 섹터</h3><p>${E(w.ai_sector.summary)}</p><ul class="clean">${w.ai_sector.themes.map((t) => `<li><b>${E(t.title)}</b> ${E(t.body)}</li>`).join("")}</ul>
+      <h3>뉴스</h3><ul class="clean">${w.news.map((n) => `<li><a href="${E(n.url)}" target="_blank" rel="noopener">${E(n.title)}</a> <span class="t-sub">${E(n.source)}</span></li>`).join("")}</ul>
+      <h3>당시 예정 일정</h3><ul class="clean">${w.calendar.map((c) => `<li>${E(c.date)} ${E(c.event)}</li>`).join("")}</ul>`;
+  }
+  el.querySelectorAll("details").forEach((d) => {
+    d.addEventListener("toggle", () => d.open && fill(d));
+    if (d.open) fill(d);
+  });
+})();
+</script>
+</body>
+</html>
