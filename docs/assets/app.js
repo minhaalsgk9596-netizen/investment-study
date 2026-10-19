@@ -4,6 +4,7 @@ const NAV = [
   ["macro.html", "매크로"],
   ["market.html", "시황·뉴스"],
   ["ai.html", "AI 섹터"],
+  ["power.html", "전력 인프라"],
   ["indicators.html", "보조지표"],
   ["learn.html", "더 공부하기"],
   ["archive.html", "지난 주차"],

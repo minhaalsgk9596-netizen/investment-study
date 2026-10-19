@@ -84,7 +84,7 @@ const LESSON = {
     <h1>${E(w?.week ?? "")}</h1>
     <p class="muted" style="font-size:.8em">${E(w?.headline ?? "")}</p>
     <p class="muted small" style="margin-top:2em">${E(w?.date ?? "")} 작성</p>
-    ${note("오늘 순서: 한 줄 요약 → 지수 → 금리·환율 → 물가·고용 → 뉴스 → AI 섹터 → 보조지표 시그널 → 지표 공부 → 일정 → 토론")}</section>`);
+    ${note("오늘 순서: 한 줄 요약 → 지수 → 금리·환율 → 물가·고용 → 뉴스 → AI 섹터 → 전력 인프라 → 보조지표 시그널 → 지표 공부 → 일정 → 토론")}</section>`);
 
   // 2. 한 줄 요약
   S.push(`<section><div class="kicker">SUMMARY</div><h2>이번 주 한 줄</h2>
@@ -131,8 +131,21 @@ const LESSON = {
     <div class="chart-s"><canvas id="ai-bar"></canvas></div>${foot}
     ${note("밸류체인 아래(메모리·칩)일수록 변동성이 크다. 실적 발표 전 CapEx 가이던스에 주목.")}</section>`);
 
+  // 8-1. 전력 인프라 (주간 글에 power_sector 가 있을 때만)
+  if (w?.power_sector) {
+    const pw = by("power").sort((a, b) => b[1].chg1w - a[1].chg1w);
+    S.push(`<section><div class="kicker">POWER INFRA</div><h2>전력 인프라: 이번 주</h2>
+      <div class="grid g2s">
+        <div>${(w.power_sector.themes ?? []).map((t) => `<div class="card" style="margin-bottom:12px"><h3>${E(t.title)}</h3><p style="margin:0">${E(t.body)}</p></div>`).join("")}</div>
+        <div><table><tr><th>종목</th><th>종가</th><th>1W</th><th>1M</th><th>YTD</th></tr>
+          ${pw.map(([, v]) => `<tr><td>${v.name}</td><td>${App.smart(v.last)}</td><td>${App.chg(v.chg1w)}</td><td>${App.chg(v.chg1m)}</td><td>${App.chg(v.ytd)}</td></tr>`).join("")}</table>
+          <p class="small muted" style="margin-top:12px">${E(w.power_sector.ls_electric ?? "")}</p></div>
+      </div>${foot}
+      ${note((w.power_sector.summary ?? "") + " 리스크: " + (w.power_sector.risks ?? []).join(" / "))}</section>`);
+  }
+
   // 9. 보조지표 시그널
-  const pool = Object.entries(sig.items).filter(([s, v]) => ["ai", "index"].includes(v.group) && s !== "^VIX").sort((a, b) => b[1].score - a[1].score);
+  const pool = Object.entries(sig.items).filter(([s, v]) => ["ai", "power", "index"].includes(v.group) && s !== "^VIX").sort((a, b) => b[1].score - a[1].score);
   const sigRow = ([, v]) => `<tr><td>${v.name}</td><td><b>${v.score}</b></td><td>${N(v.rsi, 1)}</td><td>${App.chg(v.dist_sma200)}</td><td class="l small">${v.signals.slice(0, 2).map((s) => E(s.text)).join(" · ") || "-"}</td></tr>`;
   S.push(`<section><div class="kicker">TECHNICALS</div><h2>보조지표 시그널: 체크리스트 점수</h2>
     <div class="grid g2s">

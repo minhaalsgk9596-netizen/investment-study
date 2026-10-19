@@ -37,6 +37,7 @@
       <h3>시황</h3>${w.market_summary.map((s) => `<p><b>${E(s.title)}</b> ${E(s.body)}</p>`).join("")}
       <h3>매크로</h3><p>${E(w.macro_view.summary)}</p><ul class="clean">${w.macro_view.points.map((p) => `<li>${E(p)}</li>`).join("")}</ul>
       <h3>AI 섹터</h3><p>${E(w.ai_sector.summary)}</p><ul class="clean">${w.ai_sector.themes.map((t) => `<li><b>${E(t.title)}</b> ${E(t.body)}</li>`).join("")}</ul>
+      ${w.power_sector ? `<h3>전력 인프라</h3><p>${E(w.power_sector.summary)}</p><ul class="clean">${(w.power_sector.themes || []).map((t) => `<li><b>${E(t.title)}</b> ${E(t.body)}</li>`).join("")}</ul>` : ""}
       <h3>뉴스</h3><ul class="clean">${w.news.map((n) => `<li><a href="${E(n.url)}" target="_blank" rel="noopener">${E(n.title)}</a> <span class="t-sub">${E(n.source)}</span></li>`).join("")}</ul>
       <h3>당시 예정 일정</h3><ul class="clean">${w.calendar.map((c) => `<li>${E(c.date)} ${E(c.event)}</li>`).join("")}</ul>`;
   }

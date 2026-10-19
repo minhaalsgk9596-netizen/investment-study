@@ -234,7 +234,7 @@ ATR = TR의 14일 평균</div>
   const $ = (id) => document.getElementById(id);
   const css = App.css;
   const items = Object.entries(sig.items).filter(([s]) => s !== "^VIX");
-  const groupName = { ai: "AI 종목", index: "지수", fx: "환율", commodity: "원자재" };
+  const groupName = { ai: "AI 종목", power: "전력 인프라", index: "지수", fx: "환율", commodity: "원자재" };
   const sel = $("sym");
   Object.entries(groupName).forEach(([g, label]) => {
     const og = document.createElement("optgroup"); og.label = label;

@@ -1,6 +1,6 @@
 """시세·매크로 데이터를 수집해 data/*.json 으로 저장한다.
 
-- 가격(5년 일봉): yfinance (지수, 환율, 원자재, AI 종목) → data/prices/<심볼>.json, data/market.json
+- 가격(5년 일봉): yfinance (지수, 환율, 원자재, AI·전력 인프라 종목) → data/prices/<심볼>.json, data/market.json
 - 매크로: FRED 공개 CSV (API 키 불필요) → data/macro.json
 - 한국 기준금리·CPI: 한국은행 ECOS (ECOS_API_KEY 없으면 공개 sample 키 사용)
 """
@@ -23,7 +23,7 @@ DATA = ROOT / "data"
 PRICES = DATA / "prices"
 KST = timezone(timedelta(hours=9))
 
-# group: index | fx | rate | commodity | ai
+# group: index | fx | rate | commodity | ai | power
 TICKERS = {
     "^KS11": ("KOSPI", "index"),
     "^KQ11": ("KOSDAQ", "index"),
@@ -36,6 +36,7 @@ TICKERS = {
     "^TNX": ("미 10년물 금리", "rate"),
     "GC=F": ("금", "commodity"),
     "CL=F": ("WTI 원유", "commodity"),
+    "HG=F": ("구리", "commodity"),
     "NVDA": ("엔비디아", "ai"),
     "MSFT": ("마이크로소프트", "ai"),
     "GOOGL": ("알파벳", "ai"),
@@ -46,6 +47,11 @@ TICKERS = {
     "AMD": ("AMD", "ai"),
     "005930.KS": ("삼성전자", "ai"),
     "000660.KS": ("SK하이닉스", "ai"),
+    "010120.KS": ("LS일렉트릭", "power"),
+    "267260.KS": ("HD현대일렉트릭", "power"),
+    "298040.KS": ("효성중공업", "power"),
+    "006260.KS": ("LS", "power"),
+    "001440.KS": ("대한전선", "power"),
 }
 
 # AI 밸류체인 분류 (ai.html 에서 사용)
@@ -54,6 +60,13 @@ AI_LAYER = {
     "TSM": "파운드리", "005930.KS": "메모리", "000660.KS": "메모리",
     "MSFT": "클라우드·모델", "GOOGL": "클라우드·모델", "AMZN": "클라우드·모델",
     "META": "모델·서비스",
+}
+
+# 전력 인프라 분류 (power.html 에서 사용)
+POWER_LAYER = {
+    "010120.KS": "배전·초고압 변압기·자동화", "267260.KS": "초고압 변압기·차단기",
+    "298040.KS": "초고압 변압기·차단기", "006260.KS": "전선·해저케이블 (LS전선 지주사)",
+    "001440.KS": "전선·해저케이블",
 }
 
 # id: (이름, 그룹, 변환) 변환: level | yoy | diff (전월 대비 증감)
@@ -68,6 +81,8 @@ FRED = {
     "T10Y2Y": ("장단기 금리차 (10Y-2Y)", "us_rates", "level"),
     "UNRATE": ("미국 실업률", "us_jobs", "level"),
     "PAYEMS": ("비농업 고용 증감 (천 명)", "us_jobs", "diff"),
+    "PCU335311335311": ("미국 변압기 생산자물가지수", "us_power", "level"),
+    "PCU335311335311_YOY": ("미국 변압기 생산자물가 (YoY)", "us_power", "yoy"),
 }
 
 # 한국은행 ECOS: id: (이름, 통계표, 항목, 변환)
@@ -125,8 +140,8 @@ def fetch_prices() -> dict:
                 "low52": round(float(close.iloc[-252:].min()), 2),
                 "spark": [round(float(x), 2) for x in close.iloc[-66:]],
             }
-            if group == "ai":
-                item["layer"] = AI_LAYER.get(sym)
+            if group in ("ai", "power"):
+                item["layer"] = (AI_LAYER if group == "ai" else POWER_LAYER).get(sym)
                 item.update(fetch_fundamentals(sym))
             summary[sym] = item
             print(f"  ok  {sym:10s} {name} {item['last']}")
@@ -160,7 +175,8 @@ def fetch_fred() -> dict:
     start = (datetime.now() - timedelta(days=365 * 12)).strftime("%Y-%m-%d")
     for sid, (name, group, mode) in FRED.items():
         try:
-            url = f"https://fred.stlouisfed.org/graph/fredgraph.csv?id={sid}&cosd={start}"
+            src = sid.removesuffix("_YOY")  # 같은 원계열을 수준·YoY 두 가지로 저장
+            url = f"https://fred.stlouisfed.org/graph/fredgraph.csv?id={src}&cosd={start}"
             r = requests.get(url, timeout=60)  # 브라우저 UA를 붙이면 FRED가 응답하지 않음
             r.raise_for_status()
             df = pd.read_csv(io.StringIO(r.text))
@@ -177,7 +193,7 @@ def fetch_fred() -> dict:
                 m = s.resample("MS").last()
                 s = m.diff().dropna()
             s = s[s.index >= pd.Timestamp(datetime.now() - timedelta(days=365 * 10))]
-            out[sid] = series_item(name, group, s, f"https://fred.stlouisfed.org/series/{sid}")
+            out[sid] = series_item(name, group, s, f"https://fred.stlouisfed.org/series/{src}")
             print(f"  ok  {sid:16s} {out[sid]['last']} ({out[sid]['date']})")
         except Exception as e:
             failures.append(f"fred:{sid}:{e}")

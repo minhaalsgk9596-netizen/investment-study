@@ -8,12 +8,13 @@
 | `macro.html` 매크로 | 미국 물가·금리·장단기 금리차·고용, 한국 금리·물가, 환율 차트와 해설 | 자동 + 주간 글 |
 | `market.html` 시황·뉴스 | 주간 시황, 핵심 뉴스, 기간별 수익률, 일정 | 주간 글 |
 | `ai.html` AI 섹터 | 밸류체인, 테마, 종목 PER·성과·점수 | 자동 + 주간 글 |
+| `power.html` 전력 인프라 | 전력망 기초, 전력기기 사전, 슈퍼사이클, 데이터센터 전력 구조, LS일렉트릭 해부, 국내 경쟁사 비교, 변압기 PPI·구리, 동향, 퀴즈 | 자동 + 주간 글 |
 | `indicators.html` 보조지표 | 이평선·RSI·볼린저·MACD·스토캐스틱·OBV·ATR 강의, 실차트, 매수 체크리스트, 백테스트 | 자동 |
 | `learn.html` 더 공부하기 | 밸류에이션, 실적, 수급, 통화정책, 리스크 관리(포지션 계산기), 로드맵, 용어집 | 정적 |
 | `slides.html` 발표 | 위 내용을 12장으로 자동 구성 (S: 발표자 노트, `?print-pdf`: PDF 저장) | 자동 |
 
 ## 구조
-- `scripts/fetch_data.py`: Yahoo Finance(시세 5년), FRED(미국 매크로), 한국은행 ECOS(한국 금리·CPI)에서 받아 `data/` 에 저장
+- `scripts/fetch_data.py`: Yahoo Finance(시세 5년, AI·전력 인프라 종목), FRED(미국 매크로), 한국은행 ECOS(한국 금리·CPI)에서 받아 `data/` 에 저장
 - `scripts/indicators.py`: 보조지표, 신호, 매수 체크리스트 점수, 백테스트 계산 → `data/signals.json`, `data/indicators/`
 - `content/weekly/`: 매주 Claude 루틴이 쓰는 글(JSON). 작성 지침은 `content/ROUTINE_PROMPT.md`
 - `docs/`: 화면(HTML/CSS/JS). 빌드 단계 없음

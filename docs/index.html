@@ -37,6 +37,9 @@
       <h3>🤖 AI 종목 1주 성과</h3>
       <div class="table-wrap"><table id="ai"></table></div>
       <p class="t-sub" style="margin-top:8px"><a href="ai.html">AI 섹터 분석 보기 →</a></p>
+      <h3 style="margin-top:1.2rem">⚡ 전력 인프라 1주 성과</h3>
+      <div class="table-wrap"><table id="power"></table></div>
+      <p class="t-sub" style="margin-top:8px"><a href="power.html">전력 인프라 공부하기 →</a></p>
     </div>
     <div class="card">
       <h3>🎯 매수 체크리스트 점수 (상위)</h3>
@@ -93,11 +96,13 @@
   $("macro").innerHTML = ["CPIAUCNS", "CPILFENS", "DFF", "DGS10", "UNRATE", "KR_CPI", "KR_BASE_RATE", "T10Y2Y"]
     .map((id) => mk(id, id === "T10Y2Y" ? "%p" : "%")).join("");
 
-  $("ai").innerHTML = `<tr><th>종목</th><th>종가</th><th>1W</th><th>YTD</th></tr>` +
-    by("ai").sort((a, b) => b[1].chg1w - a[1].chg1w)
+  const perf = (g) => `<tr><th>종목</th><th>종가</th><th>1W</th><th>YTD</th></tr>` +
+    by(g).sort((a, b) => b[1].chg1w - a[1].chg1w)
       .map(([, v]) => `<tr><td>${v.name}</td><td>${App.smart(v.last)}</td><td>${App.chg(v.chg1w)}</td><td>${App.chg(v.ytd)}</td></tr>`).join("");
+  $("ai").innerHTML = perf("ai");
+  $("power").innerHTML = perf("power");
 
-  const items = Object.entries(sig.items).filter(([, v]) => ["ai", "index"].includes(v.group) && v.name.indexOf("VIX") < 0)
+  const items = Object.entries(sig.items).filter(([, v]) => ["ai", "power", "index"].includes(v.group) && v.name.indexOf("VIX") < 0)
     .sort((a, b) => b[1].score - a[1].score).slice(0, 8);
   $("scores").innerHTML = items.map(([, v]) => `
     <div style="margin:10px 0">

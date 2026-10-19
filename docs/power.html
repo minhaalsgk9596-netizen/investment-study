@@ -1,0 +1,575 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>전력 인프라 스터디</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css">
+<link rel="stylesheet" href="assets/style.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<style>
+  .lv { display: inline-block; font-size: .72rem; font-weight: 700; padding: 1px 7px; border-radius: 999px; vertical-align: middle; margin-left: 6px; }
+  .lv.b { background: var(--down-soft); color: var(--down); }
+  .lv.m { background: var(--neutral-soft); color: var(--neutral); }
+  .lv.a { background: var(--up-soft); color: var(--up); }
+  .done-chk { font-size: .82rem; color: var(--muted); font-weight: 400; margin-left: 8px; white-space: nowrap; cursor: pointer; }
+  .done-chk input { vertical-align: middle; }
+  .roadmap { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 200px), 1fr)); gap: 8px; }
+  .roadmap a { display: block; background: var(--surface-2); border-radius: 10px; padding: 10px 12px; color: var(--text); }
+  .roadmap a:hover { text-decoration: none; outline: 1px solid var(--accent); }
+  .roadmap a.read { opacity: .55; }
+  .roadmap a.read b::after { content: " ✔"; color: var(--accent); }
+  .roadmap .t-sub { display: block; font-size: .8rem; color: var(--muted); }
+  .progress { height: 8px; background: var(--surface-2); border-radius: 99px; overflow: hidden; margin: 6px 0 12px; }
+  .progress > span { display: block; height: 100%; background: var(--accent); transition: width .3s; }
+  .flow-wrap { overflow-x: auto; }
+  .flow-wrap svg { min-width: 680px; width: 100%; height: auto; display: block; }
+  .src { font-size: .78rem; color: var(--muted); }
+  .src a { color: var(--muted); text-decoration: underline; }
+  .kpi { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 150px), 1fr)); gap: 8px; }
+  .kpi div { background: var(--surface-2); border-radius: 10px; padding: 10px 12px; }
+  .kpi b { display: block; font-size: 1.2rem; font-variant-numeric: tabular-nums; }
+  .kpi span { font-size: .8rem; color: var(--muted); }
+  .quiz details { margin: 6px 0; }
+  .quiz .ans { border-top: 1px dashed var(--border); padding-top: 8px; }
+  .calc { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 180px), 1fr)); gap: 10px; }
+  .calc label { font-size: .85rem; color: var(--muted); display: block; }
+  .calc input, .calc select { width: 100%; font: inherit; color: var(--text); background: var(--surface); border: 1px solid var(--border); border-radius: 8px; padding: 8px 10px; }
+  .timeline { border-left: 2px solid var(--border); margin: 6px 0 0 6px; padding-left: 14px; }
+  .timeline div { position: relative; margin: 0 0 10px; }
+  .timeline div::before { content: ""; position: absolute; left: -20px; top: 8px; width: 10px; height: 10px; border-radius: 50%; background: var(--accent); }
+  .timeline b { font-variant-numeric: tabular-nums; }
+</style>
+</head>
+<body>
+<main>
+  <div class="page-head">
+    <div>
+      <h1>⚡ 전력 인프라 스터디</h1>
+      <p class="subtitle">AI 밸류체인의 마지막 병목, 전력망. LS일렉트릭을 중심으로 기초부터 동향까지</p>
+    </div>
+    <div class="stamp"></div>
+  </div>
+
+  <nav class="toc">
+    <a href="#roadmap">로드맵</a><a href="#basics">전기의 길</a><a href="#devices">전력기기 사전</a><a href="#cycle">슈퍼사이클</a>
+    <a href="#dc">데이터센터 전력</a><a href="#ls">LS일렉트릭 해부</a><a href="#peers">경쟁사 비교</a><a href="#check">투자 체크포인트</a>
+    <a href="#trend">동향·전망</a><a href="#quiz">셀프 퀴즈</a><a href="#glossary">용어집</a>
+  </nav>
+
+  <!-- 0. 로드맵 -->
+  <h2 id="roadmap">🗺️ 학습 로드맵</h2>
+  <div class="card">
+    <p style="margin-top:0">위에서 아래로 한 번 읽고, 마지막 퀴즈로 확인하는 구성입니다. 각 제목 옆 <b>읽음</b>을 체크하면 이 브라우저에 진도가 저장됩니다.</p>
+    <div class="progress"><span id="prog" style="width:0"></span></div>
+    <div class="roadmap" id="roadmap-list"></div>
+    <div class="callout tip"><b>이 페이지의 목표</b>① 전기가 발전소에서 GPU까지 가는 경로를 그릴 수 있다 ② LS일렉트릭이 그 경로의 어디에서 돈을 버는지 설명할 수 있다 ③ 실적 발표 때 무엇을 봐야 하는지 안다 ④ 앞으로 2~3년 동안 이 산업을 흔들 변수를 안다</div>
+  </div>
+
+  <!-- 1. 기초 -->
+  <h2 id="basics" data-sec>🔌 기초: 전기가 데이터센터까지 오는 길 <span class="lv b">기초</span></h2>
+  <div class="card">
+    <div class="flow-wrap">
+      <svg viewBox="0 0 900 250" role="img" aria-label="발전소에서 데이터센터까지 전기가 흐르는 경로">
+        <defs><marker id="arr" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0,0 L10,5 L0,10 z" fill="var(--muted)"/></marker></defs>
+        <g font-family="var(--font)" text-anchor="middle">
+          <g>
+            <rect x="10" y="40" width="150" height="86" rx="12" fill="var(--surface-2)" stroke="var(--border)"/>
+            <text x="85" y="72" font-size="16" font-weight="700" fill="var(--text)">① 발전</text>
+            <text x="85" y="94" font-size="12" fill="var(--muted)">원전·가스·태양광</text>
+            <text x="85" y="112" font-size="12" fill="var(--muted)">약 20kV로 생산</text>
+          </g>
+          <g>
+            <rect x="190" y="40" width="150" height="86" rx="12" fill="var(--accent-soft)" stroke="var(--accent)"/>
+            <text x="265" y="72" font-size="16" font-weight="700" fill="var(--text)">② 승압·송전</text>
+            <text x="265" y="94" font-size="12" fill="var(--muted)">345~765kV로 올려</text>
+            <text x="265" y="112" font-size="12" fill="var(--muted)">먼 거리 이동</text>
+          </g>
+          <g>
+            <rect x="370" y="40" width="150" height="86" rx="12" fill="var(--accent-soft)" stroke="var(--accent)"/>
+            <text x="445" y="72" font-size="16" font-weight="700" fill="var(--text)">③ 변전소</text>
+            <text x="445" y="94" font-size="12" fill="var(--muted)">154kV → 22.9kV</text>
+            <text x="445" y="112" font-size="12" fill="var(--muted)">단계적으로 감압</text>
+          </g>
+          <g>
+            <rect x="550" y="40" width="150" height="86" rx="12" fill="var(--up-soft)" stroke="var(--up)"/>
+            <text x="625" y="72" font-size="16" font-weight="700" fill="var(--text)">④ 배전</text>
+            <text x="625" y="94" font-size="12" fill="var(--muted)">건물 앞까지 나눠</text>
+            <text x="625" y="112" font-size="12" fill="var(--muted)">보냄 (22.9kV 등)</text>
+          </g>
+          <g>
+            <rect x="730" y="40" width="160" height="86" rx="12" fill="var(--up-soft)" stroke="var(--up)"/>
+            <text x="810" y="72" font-size="16" font-weight="700" fill="var(--text)">⑤ 수용가</text>
+            <text x="810" y="94" font-size="12" fill="var(--muted)">데이터센터·공장</text>
+            <text x="810" y="112" font-size="12" fill="var(--muted)">380/220V로 사용</text>
+          </g>
+          <g stroke="var(--muted)" stroke-width="2" marker-end="url(#arr)">
+            <line x1="160" y1="83" x2="188" y2="83"/><line x1="340" y1="83" x2="368" y2="83"/>
+            <line x1="520" y1="83" x2="548" y2="83"/><line x1="700" y1="83" x2="728" y2="83"/>
+          </g>
+          <text x="85" y="160" font-size="12" fill="var(--muted)">발전기·터빈</text>
+          <text x="265" y="160" font-size="12" fill="var(--text)" font-weight="600">초고압 변압기·송전 케이블</text>
+          <text x="445" y="160" font-size="12" fill="var(--text)" font-weight="600">변압기·GIS·차단기</text>
+          <text x="625" y="160" font-size="12" fill="var(--text)" font-weight="600">배전 변압기·개폐기</text>
+          <text x="810" y="160" font-size="12" fill="var(--text)" font-weight="600">수배전반·차단기·UPS</text>
+          <text x="85" y="182" font-size="11" fill="var(--muted)">GE버노바·두산에너빌리티</text>
+          <text x="265" y="182" font-size="11" fill="var(--accent)">HD현대일렉·효성·LS일렉</text>
+          <text x="265" y="198" font-size="11" fill="var(--accent)">LS전선·대한전선</text>
+          <text x="445" y="182" font-size="11" fill="var(--accent)">HD현대일렉·효성·LS일렉</text>
+          <text x="625" y="182" font-size="11" fill="var(--up)">LS일렉트릭</text>
+          <text x="810" y="182" font-size="11" fill="var(--up)">LS일렉트릭 (핵심 영역)</text>
+          <text x="810" y="198" font-size="11" fill="var(--muted)">슈나이더·이튼·버티브</text>
+          <rect x="190" y="215" width="330" height="26" rx="6" fill="none" stroke="var(--accent)" stroke-dasharray="4 3"/>
+          <text x="355" y="233" font-size="12" fill="var(--accent)">전력회사(유틸리티)가 사는 영역 = 초고압</text>
+          <rect x="550" y="215" width="340" height="26" rx="6" fill="none" stroke="var(--up)" stroke-dasharray="4 3"/>
+          <text x="720" y="233" font-size="12" fill="var(--up)">건물주·데이터센터가 사는 영역 = 배전</text>
+        </g>
+      </svg>
+    </div>
+    <h3>왜 전압을 올렸다 내렸다 할까?</h3>
+    <ul class="clean">
+      <li>전선에서 열로 사라지는 손실은 <b>전류의 제곱 × 저항(I²R)</b>입니다. 같은 전력(P = V × I)을 보낼 때 전압을 10배 올리면 전류는 1/10, 손실은 <b>1/100</b>로 줄어듭니다.</li>
+      <li>그래서 멀리 보낼 땐 전압을 최대한 올리고(송전), 쓰기 직전에 다시 낮춥니다(배전). 이 "올리고 내리는" 기계가 <b>변압기</b>이고, 전기를 끊고 잇는 안전장치가 <b>차단기·개폐기</b>입니다.</li>
+      <li>한국 기준: 송전 765kV·345kV·154kV → 배전 22.9kV → 가정·사무실 220V, 공장·데이터센터 380V. (미국은 지역마다 전압 체계가 달라 제품도 맞춤형이 많습니다.)</li>
+    </ul>
+    <h3>교류(AC)와 직류(DC)</h3>
+    <ul class="clean">
+      <li><b>AC</b>(교류): 변압기로 전압을 쉽게 바꿀 수 있어 100년 넘게 전력망의 표준입니다.</li>
+      <li><b>DC</b>(직류): 반도체·배터리·GPU는 결국 직류로 움직입니다. 장거리·해저 송전에서는 손실이 적은 <b>HVDC</b>(초고압 직류)가 유리하고, 최근엔 데이터센터 안을 직류로 바꾸는 <b>800V DC</b> 논의가 시작됐습니다(→ <a href="#dc">데이터센터 전력</a>).</li>
+    </ul>
+    <div class="callout tip"><b>한 줄 정리</b>초고압(송전·변전)은 전력회사가 사는 "고속도로", 배전은 건물주가 사는 "골목길과 집 안 배선"입니다. HD현대일렉트릭·효성중공업은 고속도로가 주력이고, LS일렉트릭은 골목길·집 안(배전)이 본업이면서 고속도로(초고압 변압기)로 넓혀 가는 중입니다.</div>
+  </div>
+
+  <!-- 2. 전력기기 사전 -->
+  <h2 id="devices" data-sec>📚 전력기기 사전 <span class="lv b">기초</span></h2>
+  <div class="card">
+    <div class="table-wrap"><table>
+      <tr><th class="l">기기</th><th class="l">무엇을 하나</th><th class="l">왜 중요한가 (투자 관점)</th><th class="l">국내 주요 기업</th></tr>
+      <tr><td class="l"><b>초고압 변압기</b><br><span class="t-sub">154kV 이상</span></td><td class="l">발전소·변전소에서 전압을 크게 올리고 내림</td><td class="l">한 대에 수십억~백억 원대, 주문 제작이라 만드는 데 1년 이상. 지금 공급 부족이 가장 심한 품목</td><td class="l">HD현대일렉트릭, 효성중공업, LS일렉트릭</td></tr>
+      <tr><td class="l"><b>배전 변압기</b></td><td class="l">22.9kV 등을 건물에서 쓰는 전압으로 낮춤</td><td class="l">수량이 많고 표준화된 편. 데이터센터 한 곳에 수십~수백 대 필요</td><td class="l">LS일렉트릭 등</td></tr>
+      <tr><td class="l"><b>차단기</b><br><span class="t-sub">ACB·MCCB·VCB</span></td><td class="l">과전류·사고 때 전기를 자동으로 끊음</td><td class="l">LS일렉트릭의 전통 주력. 소모품처럼 꾸준히 팔리고 수익성이 좋은 편</td><td class="l">LS일렉트릭</td></tr>
+      <tr><td class="l"><b>GIS</b><br><span class="t-sub">가스절연개폐장치</span></td><td class="l">변전소의 차단기·개폐기를 절연가스 안에 넣어 작게 만든 설비</td><td class="l">도심·데이터센터 변전소에 필수. 초고압 업체들의 고수익 품목</td><td class="l">HD현대일렉트릭, 효성중공업, LS일렉트릭</td></tr>
+      <tr><td class="l"><b>수배전반</b><br><span class="t-sub">스위치기어·배전반</span></td><td class="l">들어온 전기를 받아(수전) 층·설비별로 나눠 보내는(배전) 큰 캐비닛. 안에 차단기·계측기가 들어감</td><td class="l"><b>데이터센터 수주의 핵심 품목</b>. LS일렉트릭의 북미 빅테크 수주 대부분이 여기에 해당</td><td class="l">LS일렉트릭</td></tr>
+      <tr><td class="l"><b>전력 케이블</b><br><span class="t-sub">초고압·해저</span></td><td class="l">송전선. 해상풍력·국가 간 연결엔 해저케이블</td><td class="l">해저케이블은 만들 수 있는 회사가 세계적으로 몇 안 됨. HVDC와 함께 장기 성장 품목</td><td class="l">LS전선(지주사 LS), 대한전선</td></tr>
+      <tr><td class="l"><b>HVDC</b></td><td class="l">교류를 직류로 바꿔 멀리 보내고 다시 교류로 바꾸는 송전 방식(변환설비 + 케이블)</td><td class="l">손실이 적어 장거리·해저 송전에 유리. 한국 '서해안 에너지고속도로'의 핵심</td><td class="l">LS전선, 대한전선, 효성중공업, LS일렉트릭(변환용 변압기)</td></tr>
+      <tr><td class="l"><b>ESS</b></td><td class="l">배터리에 전기를 저장했다 필요할 때 사용</td><td class="l">태양광 변동성 보완, 데이터센터 비상·피크 대응</td><td class="l">LS일렉트릭(시스템·PCS) 등</td></tr>
+      <tr><td class="l"><b>자동화</b><br><span class="t-sub">PLC·인버터</span></td><td class="l">공장 기계를 제어하는 컴퓨터(PLC)와 모터 속도 조절기(인버터)</td><td class="l">경기에 민감. 제조업 설비투자가 살아나야 좋아짐</td><td class="l">LS일렉트릭</td></tr>
+    </table></div>
+  </div>
+
+  <!-- 3. 슈퍼사이클 -->
+  <h2 id="cycle" data-sec>🔄 왜 지금 '슈퍼사이클'인가 <span class="lv m">중급</span></h2>
+  <div class="grid g2">
+    <div class="card">
+      <h3>수요: 네 개의 엔진이 동시에 돈다</h3>
+      <ol style="padding-left:1.2rem;margin:.3rem 0">
+        <li><b>AI 데이터센터</b>: 국제에너지기구(IEA)는 전 세계 데이터센터 전력 사용량이 2024년 약 415TWh에서 2030년 약 945TWh로 두 배 넘게 늘 것으로 봤습니다. 미국 전력 수요 증가분의 절반 가까이가 데이터센터입니다. <span class="src">(<a href="https://www.iea.org/news/ai-is-set-to-drive-surging-electricity-demand-from-data-centres-while-offering-the-potential-to-transform-how-the-energy-sector-works" target="_blank" rel="noopener">IEA, 2025.4</a>)</span></li>
+        <li><b>노후 전력망 교체</b>: 미국 전력망 상당 부분이 1960~70년대에 깔려 설계수명(30~40년)을 넘겼습니다. AI가 없어도 교체 수요가 있습니다.</li>
+        <li><b>재생에너지·전기화</b>: 태양광·풍력은 발전소가 외딴 곳에 있어 새 송전선이 필요하고, 전기차·히트펌프는 배전 수요를 늘립니다.</li>
+        <li><b>리쇼어링</b>: 미국으로 돌아오는 반도체·배터리 공장도 대규모 전력 설비가 필요합니다.</li>
+      </ol>
+    </div>
+    <div class="card">
+      <h3>공급: 쉽게 늘릴 수 없다</h3>
+      <ul class="clean">
+        <li><b>리드타임</b>(주문~납품)이 길어졌습니다. 대형 전력용 변압기 납기는 과거 12~18개월에서 30~36개월로, 초고압 변압기는 최대 5년까지 걸린다는 조사가 있습니다. <span class="src">(<a href="https://www.fnnews.com/news/202610120701047050" target="_blank" rel="noopener">파이낸셜뉴스, 2026.10</a>)</span></li>
+        <li><b>공장 증설이 느림</b>: 새 공장을 지어도 전력회사의 품질 인증과 납품 실적이 쌓여야 본격 수주가 가능합니다.</li>
+        <li><b>소재 병목</b>: 변압기 핵심 소재인 방향성 전기강판(GOES)을 미국에서 만드는 곳이 한 곳뿐이라는 지적이 있습니다.</li>
+        <li>결과: 한국산이 2025년 미국 대형 변압기 수입액 1위에 올랐습니다. <span class="src">(<a href="https://www.fnnews.com/news/202610120701047050" target="_blank" rel="noopener">파이낸셜뉴스</a>)</span></li>
+      </ul>
+    </div>
+  </div>
+  <div class="card" style="margin-top:12px">
+    <h3>📈 데이터로 보기: 미국 변압기 생산자물가(PPI)</h3>
+    <p class="t-sub" style="margin-top:0">미국 변압기 제조업체들이 받는 가격 지수(1981년 6월 = 100). 공급이 부족하면 가격이 오릅니다. 매월 자동 갱신.</p>
+    <div class="kpi" id="ppi-kpi"></div>
+    <div class="chart-box" style="margin-top:10px"><canvas id="c-ppi"></canvas></div>
+    <p class="src">출처: <a href="https://fred.stlouisfed.org/series/PCU335311335311" target="_blank" rel="noopener">FRED PCU335311335311</a></p>
+    <div class="callout warn"><b>사이클의 교훈</b>전력기기는 원래 <b>경기 순환 업종</b>입니다. 2010년대엔 공급 과잉과 저가 경쟁으로 국내 업체들이 오랜 적자·구조조정을 겪었습니다. 지금의 호황이 영원하다고 가정하지 말고, "증설 경쟁 → 공급 과잉" 신호(리드타임 단축, 변압기 가격 상승률 둔화, 신규 수주 감소)를 늘 확인해야 합니다.</div>
+  </div>
+
+  <!-- 4. 데이터센터 전력 -->
+  <h2 id="dc" data-sec>🏢 심화: 데이터센터 안의 전력 구조 <span class="lv a">심화</span></h2>
+  <div class="card">
+    <div class="timeline">
+      <div><b>① 수전</b> — 전력회사 변전소에서 고압 전기를 받음. 대형 데이터센터는 자체 변전소를 짓기도 함 <span class="t-sub">(초고압 변압기·GIS)</span></div>
+      <div><b>② 변압</b> — 중압(미국은 주로 13.8~34.5kV)으로 낮춰 건물 안으로 <span class="t-sub">(변압기·<b>중압 수배전반</b>)</span></div>
+      <div><b>③ 배전</b> — 다시 저압(480V 등)으로 낮춰 서버 홀별로 분배 <span class="t-sub">(배전 변압기·<b>저압 배전반·차단기</b> ← LS일렉트릭 핵심)</span></div>
+      <div><b>④ 무정전</b> — 정전돼도 몇 분을 버티는 UPS·배터리, 그동안 비상 발전기가 켜짐 <span class="t-sub">(UPS·ESS·발전기)</span></div>
+      <div><b>⑤ 랙</b> — PDU(멀티탭 역할)를 거쳐 서버 전원장치에서 직류로 바뀌어 GPU로 <span class="t-sub">(PDU·PSU)</span></div>
+    </div>
+    <h3>왜 AI 데이터센터는 전력기기를 더 많이 쓰나</h3>
+    <ul class="clean">
+      <li><b>랙당 전력밀도</b>: 일반 서버 랙은 10kW 안팎이었지만 최신 GPU 랙은 100kW를 넘고, 앞으로 수백 kW~1MW 랙이 거론됩니다. 같은 면적에 들어가는 전력기기가 몇 배로 늘어납니다.</li>
+      <li><b>규모</b>: 수백 MW~GW급 캠퍼스가 등장해 사실상 '작은 도시' 하나만큼의 수배전 설비가 필요합니다.</li>
+      <li><b>PUE</b>(전력효율지수) = 데이터센터 전체 전력 ÷ IT 장비 전력. 1에 가까울수록 효율적이며, 냉각·변환 손실을 줄이려는 투자가 계속됩니다.</li>
+      <li><b>현장 발전</b>: 전력망 연결을 기다리기 어려워 연료전지·가스터빈으로 자체 발전하는 사례가 늘었습니다. LS일렉트릭이 블룸에너지(연료전지)와 함께 따낸 수주가 이 흐름입니다.</li>
+    </ul>
+    <h3>다음 이슈: 800V 직류(DC) 데이터센터</h3>
+    <ul class="clean">
+      <li>지금은 교류를 여러 번 변환하다 랙 안에서 54V 직류로 바꿉니다. 랙 전력이 커지면 전류가 너무 커져 구리 배선이 감당하기 어렵습니다.</li>
+      <li>엔비디아는 2027년 차세대 랙부터 <b>800V 직류</b> 배전 구조를 제시했고, 여기엔 <b>SST</b>(반도체 변압기: 전력반도체로 전압을 바꾸는 장치)와 <b>SSCB</b>(반도체 차단기)가 필요합니다.</li>
+      <li>LS일렉트릭은 2026년 7월 LG유플러스와 800V 직류 AI 데이터센터 전력 인프라 공동 개발 MOU를 맺고, SST·SSCB·PCS 등을 개발하며 천안사업장에 직류 실증 공장('DC 팩토리')을 갖췄다고 밝혔습니다. <span class="src">(<a href="https://www.econovill.com/news/articleView.html?idxno=745804" target="_blank" rel="noopener">이코노믹리뷰, 2026.7</a>)</span></li>
+    </ul>
+    <div class="callout warn"><b>기회이자 위협</b>800V DC가 확산되면 기존 교류 배전 설비 일부가 줄어들 수 있습니다. 반대로 직류 차단기·SST는 새 시장입니다. 배전이 본업인 LS일렉트릭에는 "기존 제품 대체 위험 vs 신제품 선점 기회"가 동시에 있는 이슈라 꾸준히 지켜봐야 합니다. 아직 엔비디아와의 직접 공급 계약은 확인되지 않았습니다.</div>
+  </div>
+
+  <!-- 5. LS일렉트릭 -->
+  <h2 id="ls" data-sec>🔍 LS일렉트릭 해부 <span class="lv m">중급</span></h2>
+  <div class="grid g4" id="ls-tiles"></div>
+  <div class="grid g2" style="margin-top:12px">
+    <div class="card">
+      <h3>사업 구조</h3>
+      <ul class="clean">
+        <li><b>전력</b> (2026년 2분기 매출 1조915억 원, 영업이익 1,374억 원): 배전기기(차단기·개폐기), 수배전반, 초고압 변압기·GIS, ESS·스마트그리드</li>
+        <li><b>자동화</b> (같은 분기 매출 979억 원, 영업이익 94억 원): PLC, 인버터 등 공장 자동화</li>
+        <li><b>자회사</b>: EV 릴레이(LS이모빌리티솔루션), 미국 배전반 제조사 MCM엔지니어링II(2022년 인수) 등</li>
+      </ul>
+      <p class="src">출처: <a href="https://www.thelec.kr/news/articleView.html?idxno=59940" target="_blank" rel="noopener">디일렉</a>, <a href="https://www.businesspost.co.kr/BP?command=article_view&num=442955" target="_blank" rel="noopener">비즈니스포스트</a> (2026.7.23 잠정실적)</p>
+      <div class="callout tip"><b>읽는 법</b>이익 대부분이 <b>전력 부문</b>에서 나옵니다. 주가는 사실상 "전력 부문, 그중 북미 데이터센터와 초고압 변압기"에 연동된다고 보면 됩니다.</div>
+    </div>
+    <div class="card">
+      <h3>실적·수주 핵심 숫자</h3>
+      <div class="table-wrap"><table>
+        <tr><th class="l">기간</th><th>매출</th><th>영업이익</th><th class="l">메모</th></tr>
+        <tr><td class="l">2025년 연간</td><td>4조9,622억</td><td>4,269억</td><td class="l t-sub">사상 최대, 북미 매출 첫 1조 원 돌파, 신규수주 약 3.7조</td></tr>
+        <tr><td class="l">2026년 2Q</td><td>1조5,770억</td><td>1,785억</td><td class="l t-sub">분기 최대, 영업이익률 11.3%, 전년 대비 +64%, 컨센서스(1,640억) 상회</td></tr>
+        <tr><td class="l">2026년 3Q (전망)</td><td>약 1.74~1.79조</td><td>약 2,000~2,080억</td><td class="l t-sub">증권사 추정(한국투자·NH·유안타). 10월 말 발표 예정, 실제치로 확인할 것</td></tr>
+      </table></div>
+      <h3>수주잔고 추이 <span class="t-sub" style="font-weight:400">(조 원)</span></h3>
+      <div class="chart-box short"><canvas id="c-backlog"></canvas></div>
+      <p class="src">2025 연간: <a href="https://www.energydaily.co.kr/news/articleView.html?idxno=164142" target="_blank" rel="noopener">에너지데일리</a> · 3Q 전망: <a href="https://www.etoday.co.kr/news/view/2632548" target="_blank" rel="noopener">이투데이</a>, <a href="https://www.g-enews.com/article/Securities/2026/10/20261013090213137844093b5d4e_1" target="_blank" rel="noopener">글로벌이코노믹</a> · 잔고 2Q25·1Q26 값은 2Q26 기사(전년 대비 +81.5%, 전 분기 대비 +1.4조)로 역산한 근사치</p>
+    </div>
+  </div>
+  <div class="grid g2" style="margin-top:12px">
+    <div class="card">
+      <h3>생산 거점</h3>
+      <ul class="clean">
+        <li><b>부산 (초고압 변압기)</b>: 2025년 12월 1,008억 원을 들인 2생산동 준공. 초고압 변압기 생산능력 연 2,000억 → 6,000억 원(3배). 154~550kV 전 라인업과 HVDC 변환용 변압기 생산 가능. 2026년 부산사업장 매출 1조 원 목표. <span class="src">(<a href="https://www.thelec.kr/news/articleView.html?idxno=44812" target="_blank" rel="noopener">디일렉</a>)</span></li>
+        <li><b>미국 유타 (MCM, 배전반)</b>: 1억6,800만 달러로 생산능력 3배 확대, 2030년까지 생산동 3개 추가 계획. 2026년 3월 주정부 세제 혜택 승인. <span class="src">(<a href="https://www.mt.co.kr/industry/2026/03/18/2026031808590298730" target="_blank" rel="noopener">머니투데이</a>)</span></li>
+        <li><b>미국 텍사스 배스트럽 캠퍼스</b>: 2025년 4월 준공, 빅테크 데이터센터용 중·저압 전력기기·배전시스템 현지 생산. 현지 생산은 관세 부담을 줄이는 수단이기도 합니다.</li>
+        <li>2030년까지 북미 생산 거점에 총 2억4,000만 달러 투자 계획.</li>
+      </ul>
+    </div>
+    <div class="card">
+      <h3>최근 북미 수주 흐름 (2026년)</h3>
+      <div class="timeline">
+        <div><b>4월</b> 블룸에너지(연료전지)와 약 3,190억 원 규모 데이터센터 배전 솔루션 계약</div>
+        <div><b>8월</b> 미국 빅테크 데이터센터 전력설비 2,309억 원 (기존 계약 물량 확대) <span class="src">(<a href="https://view.asiae.co.kr/article/2026082410411370785" target="_blank" rel="noopener">아시아경제</a>)</span></div>
+        <div><b>10월 13일</b> 블룸에너지 연계 펜실베이니아 빅테크 데이터센터 1,852억 원. 블룸 관련 누적 수주 5억 달러 돌파 <span class="src">(<a href="https://biz.newdaily.co.kr/site/data/html/2026/10/13/2026101300148.html" target="_blank" rel="noopener">뉴데일리</a>)</span></div>
+        <div><b>10월 16일</b> 미국 빅테크 데이터센터 수배전반 1,689억 원(2027년 납품분). 2027~2028년 장기공급계약(LTA) 체결 <span class="src">(<a href="https://www.kukinews.com/article/view/kuk202610190068" target="_blank" rel="noopener">쿠키뉴스</a>)</span></div>
+      </div>
+      <div class="callout tip"><b>장기공급계약(LTA)이 왜 중요?</b>한 번 납품하고 끝나는 게 아니라 고객이 몇 년치 물량을 미리 잡아 둔다는 뜻입니다. 매출 가시성이 높아지는 대신, 계약 가격이 고정되면 원가(구리 등)가 오를 때 마진이 눌릴 수 있습니다.</div>
+    </div>
+  </div>
+  <div class="grid g2" style="margin-top:12px">
+    <div class="card flat"><h3>👍 강점</h3><ul class="clean">
+      <li>배전(차단기·수배전반) 경쟁력 + 초고압 변압기까지 갖춘 <b>풀 라인업</b></li>
+      <li>미국 빅테크 데이터센터와 직접 거래 레퍼런스, 장기공급계약</li>
+      <li>미국 현지 생산(유타·텍사스)으로 납기·관세 대응</li>
+      <li>800V DC·SST 등 차세대 직류 기술 개발</li>
+    </ul></div>
+    <div class="card flat"><h3>⚠️ 리스크</h3><ul class="clean">
+      <li><b>집중도</b>: 미국·데이터센터 의존도가 높아 빅테크 CapEx가 꺾이면 바로 영향 <span class="src">(<a href="https://www.leadeconomy.co.kr/news/articleView.html?idxno=8799" target="_blank" rel="noopener">리드경제</a>)</span></li>
+      <li><b>잔고의 시차</b>: 수주잔고의 절반가량은 2027년 이후 매출로 반영될 물량</li>
+      <li><b>밸류에이션</b>: 기대가 선반영돼 PER이 높고, 실적이 기대를 조금만 밑돌아도 주가가 크게 흔들림 (2026년 10월 중순 하루 10%대 급락 사례)</li>
+      <li><b>원자재·환율</b>: 구리 가격 상승, 원화 강세는 마진에 부담</li>
+      <li><b>통상</b>: 미국 관세·반덤핑 정책 변화</li>
+    </ul></div>
+  </div>
+
+  <!-- 6. 경쟁사 -->
+  <h2 id="peers" data-sec>🏁 국내 경쟁사 비교 <span class="lv m">중급</span></h2>
+  <div class="card">
+    <div class="table-wrap"><table>
+      <tr><th class="l">기업</th><th class="l">주력</th><th class="l">미국 생산</th><th class="l">특징</th></tr>
+      <tr><td class="l"><b>LS일렉트릭</b></td><td class="l">배전기기·수배전반, 초고압 변압기, 자동화</td><td class="l">유타(배전반)·텍사스</td><td class="l">데이터센터 '건물 안' 전력에 강함. 초고압은 후발 주자로 확대 중</td></tr>
+      <tr><td class="l"><b>HD현대일렉트릭</b></td><td class="l">초고압 변압기, 차단기·GIS, 회전기</td><td class="l">앨라배마(변압기)</td><td class="l">앨라배마 공장 누적 1,000대 출하, 2억 달러 증설로 현지 생산능력 50% 확대 추진 <span class="src">(<a href="https://www.g-enews.com/article/Global-Biz/2026/08/2026080708232453800c8c1c064d_1" target="_blank" rel="noopener">글로벌이코노믹</a>)</span></td></tr>
+      <tr><td class="l"><b>효성중공업</b></td><td class="l">초고압 변압기·차단기, HVDC, 건설</td><td class="l">테네시 멤피스(변압기)</td><td class="l">멤피스 공장에 2028년까지 1억5,700만 달러 증설. 2026년 10월 미국 빅테크 AI 데이터센터에 2억8,500만 달러 변압기 공급 <span class="src">(<a href="https://g-enews.com/article/Global-Biz/2026/10/2026101808470255720c8c1c064d_1" target="_blank" rel="noopener">글로벌이코노믹</a>)</span></td></tr>
+      <tr><td class="l"><b>LS</b></td><td class="l">지주사. LS전선(초고압·해저케이블), LS일렉트릭 등 보유</td><td class="l">LS전선 미국 케이블 공장</td><td class="l">LS전선이 525kV HVDC 해저케이블 사전검증(PQ) 국내 최초 통과 <span class="src">(<a href="https://www.mt.co.kr/industry/2026/07/09/2026070909585016744" target="_blank" rel="noopener">머니투데이</a>)</span></td></tr>
+      <tr><td class="l"><b>대한전선</b></td><td class="l">초고압 전력 케이블, 해저케이블</td><td class="l">-</td><td class="l">당진 해저케이블 2공장 2027년 준공 목표, 서해안 HVDC 공략 <span class="src">(<a href="https://www.newspim.com/news/view/20260512001212" target="_blank" rel="noopener">뉴스핌</a>)</span></td></tr>
+    </table></div>
+    <h3>지금 숫자로 비교 <span class="t-sub" style="font-weight:400">(평일 자동 갱신)</span></h3>
+    <div class="table-wrap"><table id="peer-tbl"></table></div>
+    <p class="t-sub" style="margin-top:8px">예상 PER = 시가총액 ÷ 향후 12개월 예상 순이익(Yahoo Finance 기준, 국내 증권사 컨센서스와 다를 수 있음). 점수 = <a href="indicators.html#checklist">매수 체크리스트</a>. LS는 지주사라 자회사 가치를 할인해서 거래되는 경향(지주사 할인)이 있어 PER을 단순 비교하기 어렵습니다.</p>
+  </div>
+  <div class="card" style="margin-top:12px">
+    <h3>상대 성과 (시작일 = 100)</h3>
+    <div class="seg" id="range" style="margin-bottom:10px">
+      <button data-d="22">1개월</button><button data-d="66">3개월</button><button data-d="252" class="on">1년</button><button data-d="756">3년</button>
+    </div>
+    <div class="chart-box tall"><canvas id="c-rel"></canvas></div>
+  </div>
+
+  <!-- 7. 체크포인트 -->
+  <h2 id="check" data-sec>✅ 투자 체크포인트 <span class="lv a">심화</span></h2>
+  <div class="grid g3">
+    <div class="card flat"><h3>① 신규 수주 &amp; 수주잔고</h3><p>전력기기는 <b>수주 → 1~3년 뒤 매출</b> 구조입니다. 매출보다 신규 수주가 선행지표. 잔고 ÷ 연 매출 = 몇 년치 일감이 쌓였는지.</p></div>
+    <div class="card flat"><h3>② 영업이익률</h3><p>수요가 강하면 가격 협상력이 생겨 이익률이 오릅니다. LS일렉트릭은 2026년 2분기 11.3%. 초고압 업체들은 이보다 높은 편이라 <b>믹스(초고압·북미 비중)</b> 변화가 핵심.</p></div>
+    <div class="card flat"><h3>③ 북미 매출 비중</h3><p>북미 데이터센터 물량이 가장 마진이 좋습니다. 2026년 2분기 LS일렉트릭 북미 매출 약 4,000억 원으로 분기 최대.</p></div>
+    <div class="card flat"><h3>④ 빅테크 CapEx</h3><p>MS·구글·아마존·메타의 설비투자 가이던스. <a href="ai.html">AI 섹터</a>와 같은 선행지표입니다. 전력기기는 체인의 끝이라 가장 늦게, 하지만 오래 반응합니다.</p></div>
+    <div class="card flat"><h3>⑤ 변압기 가격 &amp; 리드타임</h3><p>가격 상승률이 둔화되고 리드타임이 짧아지면 <b>공급이 수요를 따라잡는 신호</b>. 위 PPI 차트로 확인.</p></div>
+    <div class="card flat"><h3>⑥ 구리 &amp; 환율</h3><p>구리는 변압기·배전반·케이블의 주재료(원가 ↑). 원화 약세는 수출 기업 이익에 우호적. 아래 구리 차트 참고.</p></div>
+  </div>
+  <div class="card" style="margin-top:12px">
+    <h3>📈 구리 가격 (달러/파운드)</h3>
+    <div class="kpi" id="cu-kpi"></div>
+    <div class="chart-box" style="margin-top:10px"><canvas id="c-cu"></canvas></div>
+  </div>
+  <div class="card" style="margin-top:12px">
+    <h3>🧮 PER 감 잡기 계산기</h3>
+    <p class="t-sub" style="margin-top:0">시가총액은 자동으로 채워집니다. "내가 생각하는 미래 순이익"을 넣으면 그 이익 기준 PER이 나옵니다. 시장이 몇 년 뒤 이익까지 당겨서 사고 있는지 감을 잡는 연습입니다.</p>
+    <div class="calc">
+      <div><label>종목</label><select id="pe-sym"></select></div>
+      <div><label>시가총액 (억 원)</label><input id="pe-mcap" type="number" inputmode="decimal"></div>
+      <div><label>연간 순이익 가정 (억 원)</label><input id="pe-ni" type="number" inputmode="decimal" value="4000"></div>
+    </div>
+    <p class="calc-out" id="pe-out" style="font-size:1.05rem;margin-top:12px"></p>
+    <div class="callout warn"><b>사이클 업종 PER 함정</b>이익이 정점일 때 PER이 가장 낮아 보이고, 그때가 주가 고점인 경우가 많습니다. 전력기기도 '수주가 꺾이는 시점'이 주가에 먼저 반영됩니다. PER만 보지 말고 수주 추세를 함께 보세요.</div>
+  </div>
+
+  <!-- 8. 동향 -->
+  <h2 id="trend" data-sec>🔭 동향과 전망 (2026년 10월 기준) <span class="lv a">심화</span></h2>
+  <div class="card" id="weekly-power" hidden>
+    <span class="pill info">이번 주 전력 인프라</span> <span class="t-sub" id="wp-date"></span>
+    <p id="wp-summary" style="margin-top:.6rem;font-weight:600"></p>
+    <p id="wp-ls"></p>
+    <div class="grid g2" id="wp-themes"></div>
+    <div class="grid g2" style="margin-top:12px">
+      <div><h3>⚠️ 리스크</h3><ul class="clean" id="wp-risks"></ul></div>
+      <div><h3>👀 확인할 것</h3><ul class="clean" id="wp-watch"></ul></div>
+    </div>
+  </div>
+  <div class="grid g2" style="margin-top:12px">
+    <div class="card">
+      <h3>🇺🇸 미국: 관세와 통상</h3>
+      <ul class="clean">
+        <li>2026년 4월 무역확장법 232조 개편에서 대형 변압기 등 일부 전력 기자재에 한시적으로 15% 관세를 적용하기로 했습니다(완화 방향). 미국 전력망 병목이 그만큼 심각하다는 뜻이기도 합니다. <span class="src">(<a href="https://v.daum.net/v/20260628072105404" target="_blank" rel="noopener">2026.6 보도</a>)</span></li>
+        <li>반면 2026년 10월 1일 미국 상무부는 한국산 대형 변압기 반덤핑 연례 재심을 개시했습니다(최종 결과 2027년 8월 예정). <span class="src">(<a href="https://www.g-enews.com/article/Global-Biz/2026/10/202610020721279546fbbec65dfb_1" target="_blank" rel="noopener">글로벌이코노믹</a>)</span></li>
+        <li>현지 생산 확대(LS 유타·텍사스, HD현대 앨라배마, 효성 멤피스)는 관세와 납기 문제를 동시에 줄이는 전략입니다.</li>
+      </ul>
+    </div>
+    <div class="card">
+      <h3>🇰🇷 한국: 전력망 특별법 &amp; 에너지고속도로</h3>
+      <ul class="clean">
+        <li>'국가기간 전력망 확충 특별법' 시행으로 서해안 HVDC·동서울 변전소 등 99개 송·변전 사업이 국가기간망으로 지정됐습니다. 총 건설비 약 30조 원 추정. <span class="src">(<a href="https://www.electimes.com/news/articleView.html?idxno=360401" target="_blank" rel="noopener">전기신문</a>)</span></li>
+        <li>한전은 서해안 HVDC를 2038년까지 단계적으로 구축하며, 1단계(새만금~수도권)는 2030년 완공 목표, 해저케이블 발주는 2027년 초 예정입니다. <span class="src">(<a href="https://www.mt.co.kr/policy/2026/03/19/2026031909460093017" target="_blank" rel="noopener">머니투데이</a>)</span></li>
+        <li>수혜 축: 해저케이블(LS전선·대한전선), HVDC 변환설비·변압기(효성·LS일렉트릭 등).</li>
+      </ul>
+    </div>
+    <div class="card">
+      <h3>⚙️ 기술</h3>
+      <ul class="clean">
+        <li><b>800V DC·SST</b>: 2027년 이후 데이터센터 전력 구조 변화. 반도체 기반 전력기기라는 새 경쟁 무대 (ABB 등 글로벌 기업도 참여).</li>
+        <li><b>HVDC</b>: 해상풍력·장거리 송전 확대로 성장. 변환설비는 아직 해외 기업 비중이 크고 국산화가 진행 중.</li>
+        <li><b>현장 발전 + ESS</b>: 전력망 연결 대기 때문에 연료전지·가스터빈·ESS를 붙인 데이터센터가 늘어남.</li>
+      </ul>
+    </div>
+    <div class="card">
+      <h3>📅 앞으로 확인할 일정</h3>
+      <ul class="clean">
+        <li><b>2026년 10월 말</b> LS일렉트릭 3분기 실적 (증권사 예상 영업이익 약 2,000억 원 안팎)</li>
+        <li><b>매 분기</b> 빅테크 실적의 CapEx 가이던스</li>
+        <li><b>2026년 4분기~2027년</b> HD현대일렉트릭 울산·앨라배마, 효성 멤피스 증설 가동 → 공급 확대 속도</li>
+        <li><b>2027년 초</b> 서해안 HVDC 해저케이블 발주</li>
+        <li><b>2027년</b> 엔비디아 800V DC 랙 도입 시점</li>
+        <li><b>2027년 8월</b> 미국 대형 변압기 반덤핑 재심 결과</li>
+      </ul>
+    </div>
+  </div>
+  <div class="callout warn" style="margin-top:12px"><b>2026년 10월 주가 조정을 어떻게 볼까</b>10월 중순 전력기기주가 하루 10%대 급락했고, 증권사들이 목표주가를 낮췄습니다. 보도들은 실적 훼손보다 <b>앞서 많이 오른 주가를 실적 눈높이에 맞추는 조정</b>(밸류에이션 부담·차익실현)으로 해석했습니다 <span class="src">(<a href="https://www.etoday.co.kr/news/view/2635279" target="_blank" rel="noopener">이투데이</a>)</span>. 공부 포인트: "실적은 좋은데 주가가 빠지는" 구간에선 무엇이 이미 가격에 반영됐는지(예상 PER, 컨센서스)를 확인하는 습관을 들이세요.</div>
+
+  <!-- 9. 퀴즈 -->
+  <h2 id="quiz" data-sec>📝 셀프 퀴즈</h2>
+  <div class="card quiz" id="quiz-box"></div>
+
+  <!-- 10. 용어집 -->
+  <h2 id="glossary">📖 용어집</h2>
+  <div class="card">
+    <div class="table-wrap"><table>
+      <tr><th class="l">용어</th><th class="l">뜻</th></tr>
+      <tr><td class="l"><b>kV (킬로볼트)</b></td><td class="l">전압 단위. 1kV = 1,000V. 154kV 이상을 보통 '초고압'이라 부름</td></tr>
+      <tr><td class="l"><b>MW / GW</b></td><td class="l">전력(순간 사용량) 단위. 1GW = 1,000MW ≈ 원전 1기. 대형 AI 데이터센터는 수백 MW~GW급</td></tr>
+      <tr><td class="l"><b>TWh</b></td><td class="l">전력량(일정 기간 쓴 총량) 단위. 1TWh = 10억 kWh</td></tr>
+      <tr><td class="l"><b>송전 / 배전</b></td><td class="l">송전 = 발전소에서 변전소까지 고압으로 멀리 보냄. 배전 = 변전소에서 수요처까지 나눠 보냄</td></tr>
+      <tr><td class="l"><b>리드타임</b></td><td class="l">주문부터 납품까지 걸리는 시간. 길수록 공급 부족</td></tr>
+      <tr><td class="l"><b>수주잔고 (Backlog)</b></td><td class="l">계약은 했지만 아직 매출로 인식하지 않은 일감</td></tr>
+      <tr><td class="l"><b>Book-to-Bill</b></td><td class="l">신규 수주 ÷ 매출. 1보다 크면 잔고가 쌓이는 중</td></tr>
+      <tr><td class="l"><b>CapEx</b></td><td class="l">설비투자. 빅테크 CapEx가 데이터센터 → 전력기기 수요로 이어짐</td></tr>
+      <tr><td class="l"><b>GIS</b></td><td class="l">가스절연개폐장치. 변전소의 차단·개폐 설비를 소형화한 것</td></tr>
+      <tr><td class="l"><b>HVDC</b></td><td class="l">초고압 직류 송전. 장거리·해저 송전에 유리</td></tr>
+      <tr><td class="l"><b>SST</b></td><td class="l">반도체 변압기(Solid-State Transformer). 전력반도체로 전압·AC/DC를 변환</td></tr>
+      <tr><td class="l"><b>SSCB</b></td><td class="l">반도체 차단기. 기계식보다 훨씬 빠르게 전류를 끊음. 직류 배전에 필요</td></tr>
+      <tr><td class="l"><b>UPS / PDU</b></td><td class="l">무정전 전원장치 / 랙에 전기를 나눠주는 분배장치</td></tr>
+      <tr><td class="l"><b>PUE</b></td><td class="l">데이터센터 전체 전력 ÷ IT 장비 전력. 1에 가까울수록 효율적</td></tr>
+      <tr><td class="l"><b>PCS</b></td><td class="l">전력변환장치. ESS 배터리의 직류와 전력망의 교류를 바꿔 줌</td></tr>
+      <tr><td class="l"><b>GOES</b></td><td class="l">방향성 전기강판. 변압기 철심 소재로 공급 병목 품목</td></tr>
+      <tr><td class="l"><b>LTA</b></td><td class="l">장기공급계약. 여러 해 물량을 미리 확보하는 계약</td></tr>
+      <tr><td class="l"><b>232조 관세</b></td><td class="l">미국 무역확장법 232조. 국가안보를 이유로 수입품에 관세를 매기는 근거 조항</td></tr>
+    </table></div>
+  </div>
+  <p class="t-sub" style="margin-top:16px">본문 수치는 표시한 기사·공시 시점 기준이며, 이후 바뀔 수 있습니다. 학습용 자료이며 특정 종목의 매수·매도를 권유하지 않습니다.</p>
+</main>
+<script src="assets/app.js"></script>
+<script>
+// ---------- 진도 체크 (이 브라우저에만 저장) ----------
+(() => {
+  const KEY = "power-read";
+  let read = {};
+  try { read = JSON.parse(localStorage.getItem(KEY)) || {}; } catch {}
+  const save = () => { try { localStorage.setItem(KEY, JSON.stringify(read)); } catch {} };
+  const secs = [...document.querySelectorAll("h2[data-sec]")];
+  const list = document.getElementById("roadmap-list");
+  function render() {
+    const n = secs.filter((h) => read[h.id]).length;
+    document.getElementById("prog").style.width = `${(n / secs.length) * 100}%`;
+    list.innerHTML = secs.map((h, i) => {
+      const title = h.childNodes[0].textContent.trim();
+      const lv = h.querySelector(".lv")?.textContent ?? "";
+      return `<a href="#${h.id}" class="${read[h.id] ? "read" : ""}"><b>${i + 1}. ${App.esc(title.replace(/^\S+\s/, ""))}</b><span class="t-sub">${lv}</span></a>`;
+    }).join("");
+  }
+  secs.forEach((h) => {
+    const lab = document.createElement("label");
+    lab.className = "done-chk";
+    lab.innerHTML = `<input type="checkbox"> 읽음`;
+    const cb = lab.querySelector("input");
+    cb.checked = !!read[h.id];
+    cb.onchange = () => { read[h.id] = cb.checked; save(); render(); };
+    h.append(lab);
+  });
+  render();
+})();
+
+// ---------- 퀴즈 ----------
+const QUIZ = [
+  ["기초", "같은 전력을 보낼 때 전압을 10배 높이면 송전 손실은 대략 어떻게 되나?", "약 1/100. 전류가 1/10이 되고 손실은 전류의 제곱(I²R)에 비례하기 때문입니다."],
+  ["기초", "초고압 변압기와 수배전반 중 데이터센터 '건물 안'에 더 가까운 것은?", "수배전반. 초고압 변압기는 발전소·변전소(전력회사 영역), 수배전반은 건물에 들어온 전기를 나누는 설비입니다."],
+  ["기초", "HVDC가 장거리·해저 송전에 쓰이는 이유는?", "직류는 교류보다 장거리 송전 손실이 적고, 해저케이블에서 생기는 충전 전류 문제가 없기 때문입니다."],
+  ["기초", "LS일렉트릭의 영업이익 대부분은 전력·자동화 중 어느 부문에서 나오나?", "전력 부문. 2026년 2분기 전체 영업이익 1,785억 원 중 1,374억 원이 전력 부문이었습니다."],
+  ["중급", "수주잔고가 늘었는데 이번 분기 매출은 별로 안 늘 수 있는 이유는?", "전력기기는 수주 후 생산·납품까지 1~3년이 걸려 매출 인식이 늦습니다. LS일렉트릭 잔고의 절반가량은 2027년 이후 반영 물량으로 분석됩니다."],
+  ["중급", "변압기 리드타임이 짧아지기 시작하면 어떤 신호로 읽어야 하나?", "공급(증설)이 수요를 따라잡기 시작했다는 신호. 가격 협상력과 이익률이 정점을 지날 수 있습니다."],
+  ["중급", "구리 가격이 크게 오르면 장기공급계약(LTA)이 많은 회사에 어떤 영향이 있나?", "판매 가격이 미리 정해져 있으면 원가만 올라 마진이 눌릴 수 있습니다. 원자재 가격 연동 조항이 있는지가 중요합니다."],
+  ["중급", "HD현대일렉트릭·효성중공업과 비교한 LS일렉트릭의 사업 위치 차이는?", "두 회사는 초고압 변압기 등 전력회사(송·변전) 중심, LS일렉트릭은 배전·수배전반 중심으로 데이터센터 내부 전력에 강하고 초고압을 넓혀 가는 중입니다."],
+  ["심화", "800V DC 데이터센터가 확산되면 LS일렉트릭에 어떤 기회와 위협이 있나?", "기회: SST·반도체 차단기 등 신제품 시장. 위협: 기존 교류 배전 설비 일부가 대체될 수 있음. 그래서 직류 기술 개발·실증 진척을 지켜봐야 합니다."],
+  ["심화", "실적이 사상 최대인데 주가가 급락할 수 있는 이유를 PER 관점에서 설명하면?", "주가는 이미 미래 이익(예상 PER)을 반영합니다. 결과가 예상보다 '덜 좋거나' 기대가 너무 높았으면 실적이 좋아도 주가가 조정받습니다."],
+  ["심화", "전력기기 업황 정점을 미리 알아채려면 어떤 지표 조합을 볼까?", "신규 수주 증가율 둔화 + Book-to-Bill 1 이하 + 변압기 가격(PPI) 상승률 둔화 + 리드타임 단축 + 빅테크 CapEx 가이던스 하향."],
+  ["심화", "미국 현지 공장이 관세 외에 주는 이점은?", "납기 단축·물류비 절감, 미국 전력회사·빅테크의 '현지 생산' 선호 충족, 현지 인센티브(세제 혜택) 확보."],
+];
+document.getElementById("quiz-box").innerHTML = ["기초", "중급", "심화"].map((lv) =>
+  `<h3>${lv}</h3>` + QUIZ.filter((q) => q[0] === lv).map(([, q, a]) =>
+    `<details><summary>${App.esc(q)}</summary><div class="ans">${App.esc(a)}</div></details>`).join("")).join("");
+
+// ---------- 수주잔고 차트 (정적) ----------
+(() => {
+  if (!window.Chart) return;
+  new Chart(document.getElementById("c-backlog"), {
+    type: "bar",
+    data: { labels: ["2Q25", "4Q25", "1Q26", "2Q26"], datasets: [{ data: [3.9, 5.0, 5.6, 7.0], backgroundColor: App.css("--accent"), borderRadius: 6 }] },
+    options: { animation: false, plugins: { legend: { display: false }, tooltip: { callbacks: { label: (c) => `약 ${c.parsed.y}조 원` } } }, scales: { y: { beginAtZero: true } } },
+  });
+})();
+
+// ---------- 자동 데이터 ----------
+(async () => {
+  const [m, macro, sig, w] = await Promise.all([
+    App.load("data/market.json"), App.loadOpt("data/macro.json"),
+    App.loadOpt("data/signals.json"), App.loadOpt("content/weekly/latest.json"),
+  ]);
+  const $ = (id) => document.getElementById(id);
+  const E = App.esc;
+  const power = Object.entries(m).filter(([, v]) => v.group === "power");
+  const items = sig?.items || {};
+
+  // LS일렉트릭 타일
+  const ls = m["010120.KS"];
+  if (ls) {
+    const g = items["010120.KS"] || {};
+    $("ls-tiles").innerHTML = App.tile(ls) + `
+      <div class="card tile"><div class="t-name">52주 범위</div><div class="t-val">${App.smart(ls.low52)} ~ ${App.smart(ls.high52)}</div>
+        <div class="t-sub">현재가는 고점 대비 ${App.num((ls.last / ls.high52 - 1) * 100, 1)}%</div></div>
+      <div class="card tile"><div class="t-name">시가총액 · 예상 PER</div><div class="t-val">${ls.mcap ? App.bigNum(ls.mcap) + "원" : "-"}</div>
+        <div class="t-sub">예상 PER ${ls.fwd_per ? App.num(ls.fwd_per, 1) + "배" : "-"} · PBR ${ls.pbr ? App.num(ls.pbr, 1) : "-"}</div></div>
+      <div class="card tile"><div class="t-name">매수 체크리스트 점수</div><div class="t-val">${g.score ?? "-"}<span class="t-sub"> / 100</span></div>
+        <div class="score-bar" style="margin-top:6px"><span style="width:${g.score ?? 0}%"></span></div>
+        <div class="t-sub" style="margin-top:6px">RSI ${g.rsi ?? "-"} · <a href="indicators.html">보조지표에서 차트 보기</a></div></div>`;
+    App.drawSparks($("ls-tiles"));
+  }
+
+  // 비교표
+  $("peer-tbl").innerHTML = `<tr><th class="l">종목</th><th class="l">분야</th><th>종가</th><th>1W</th><th>1M</th><th>YTD</th><th>예상 PER</th><th>PBR</th><th>시가총액</th><th>RSI</th><th>점수</th></tr>` +
+    power.map(([s, v]) => {
+      const g = items[s] || {};
+      return `<tr><td class="l"><b>${E(v.name)}</b> <span class="t-sub">${s}</span></td><td class="l t-sub">${E(v.layer || "")}</td>
+        <td>${App.smart(v.last)}</td><td>${App.chg(v.chg1w)}</td><td>${App.chg(v.chg1m)}</td><td>${App.chg(v.ytd)}</td>
+        <td>${v.fwd_per ? App.num(v.fwd_per, 1) : "-"}</td><td>${v.pbr ? App.num(v.pbr, 1) : "-"}</td>
+        <td>${v.mcap ? App.bigNum(v.mcap) + "원" : "-"}</td><td>${g.rsi ?? "-"}</td><td><b>${g.score ?? "-"}</b></td></tr>`;
+    }).join("");
+
+  // PER 계산기
+  const sel = $("pe-sym");
+  power.forEach(([s, v]) => sel.append(new Option(v.name, s)));
+  const calc = () => {
+    const mc = +$("pe-mcap").value, ni = +$("pe-ni").value;
+    $("pe-out").innerHTML = mc > 0 && ni > 0
+      ? `순이익 ${App.num(ni, 0)}억 원 기준 PER <b>${App.num(mc / ni, 1)}배</b> <span class="t-sub">(이익수익률 ${App.num((ni / mc) * 100, 1)}%)</span>`
+      : `<span class="t-sub">값을 입력하세요</span>`;
+  };
+  sel.onchange = () => { const v = m[sel.value]; $("pe-mcap").value = v?.mcap ? Math.round(v.mcap / 1e8) : ""; calc(); };
+  $("pe-mcap").oninput = calc; $("pe-ni").oninput = calc;
+  sel.onchange();
+
+  // 상대 성과
+  const files = await Promise.all(power.map(([, v]) => App.load(`data/prices/${v.file}.json`)));
+  let chart;
+  function draw(days) {
+    chart?.destroy();
+    chart = App.lineChart($("c-rel"), files.map((f) => {
+      const rows = f.rows.slice(-days), base = rows[0][4];
+      return { label: f.name, points: rows.map((r) => [r[0], (r[4] / base) * 100]) };
+    }));
+    const pal = ["#d6336c", "#3b5bdb", "#e8890c", "#2f9e44", "#7048e8"];
+    chart.data.datasets.forEach((d, i) => { d.borderColor = pal[i % pal.length]; d.borderWidth = i === 0 ? 2.8 : 1.6; });
+    chart.options.plugins.legend.position = "bottom";
+    chart.update();
+  }
+  document.querySelectorAll("#range button").forEach((b) => b.onclick = () => {
+    document.querySelectorAll("#range button").forEach((x) => x.classList.toggle("on", x === b));
+    draw(+b.dataset.d);
+  });
+  draw(252);
+
+  // 변압기 PPI
+  const ppi = macro?.PCU335311335311, ppiY = macro?.PCU335311335311_YOY;
+  if (ppi) {
+    const s5 = ppi.series.filter(([d]) => d >= ppi.series[ppi.series.length - 1][0].replace(/^(\d{4})/, (y) => y - 5));
+    $("ppi-kpi").innerHTML = `<div><span>최신 지수 (${ppi.date.slice(0, 7)})</span><b>${App.num(ppi.last, 1)}</b></div>
+      <div><span>전년 대비</span><b>${ppiY ? App.chg(ppiY.last) : "-"}</b></div>
+      <div><span>5년 전 대비</span><b>${App.chg((ppi.last / s5[0][1] - 1) * 100)}</b></div>`;
+    App.lineChart($("c-ppi"), [{ label: "변압기 PPI", points: ppi.series }]);
+  } else $("ppi-kpi").innerHTML = `<p class="empty">데이터를 불러오지 못했습니다</p>`;
+
+  // 구리
+  const cu = m["HG=F"];
+  if (cu) {
+    $("cu-kpi").innerHTML = `<div><span>최근 (${cu.date})</span><b>$${App.num(cu.last, 2)}</b></div>
+      <div><span>1개월</span><b>${App.chg(cu.chg1m)}</b></div><div><span>연초 대비</span><b>${App.chg(cu.ytd)}</b></div>`;
+    const f = await App.load(`data/prices/${cu.file}.json`);
+    App.lineChart($("c-cu"), [{ label: "구리", points: f.rows.slice(-756).map((r) => [r[0], r[4]]), color: App.css("--neutral") }]);
+  }
+
+  // 주간 글의 전력 인프라 블록 (있을 때만)
+  const p = w?.power_sector;
+  if (p) {
+    $("weekly-power").hidden = false;
+    $("wp-date").textContent = `${w.date} 주간 글`;
+    $("wp-summary").textContent = p.summary;
+    $("wp-ls").innerHTML = p.ls_electric ? `<b>LS일렉트릭</b> ${E(p.ls_electric)}` : "";
+    $("wp-themes").innerHTML = (p.themes || []).map((t) => `<div class="card flat"><h3>${E(t.title)}</h3><p>${E(t.body)}</p></div>`).join("");
+    $("wp-risks").innerHTML = (p.risks || []).map((r) => `<li>${E(r)}</li>`).join("");
+    $("wp-watch").innerHTML = (p.watch || []).map((r) => `<li>${E(r)}</li>`).join("");
+  }
+})().catch((e) => { document.querySelector("main").insertAdjacentHTML("beforeend", `<p class="empty">데이터를 불러오지 못했습니다: ${e.message}</p>`); });
+</script>
+</body>
+</html>

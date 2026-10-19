@@ -11,6 +11,7 @@
 - 이번 주(직전 월~금) 한국·미국 증시 시황: 큰 움직임의 원인
 - 매크로: 물가·고용 지표 발표 결과(예상치 대비), 연준·한국은행 발언과 결정, 유가·환율
 - AI 섹터: 빅테크 실적·CapEx, 엔비디아·반도체·메모리(HBM) 뉴스, AI 기업 매출·자금조달
+- 전력 인프라: LS일렉트릭·HD현대일렉트릭·효성중공업·LS(전선)·대한전선의 수주·실적·증설 공시, 미국 전력망·데이터센터 전력 뉴스, 변압기 리드타임·가격, 구리 가격, 관세·전력망 정책(미국 232조·반덤핑, 한국 전력망 특별법·HVDC), 800V DC 등 기술 동향
 - 다음 주 일정: FOMC·금통위·CPI·고용·주요 실적 발표 (날짜는 확인된 것만, 불확실하면 "날짜 확인 필요")
 - 출처는 Bloomberg, Reuters, CNBC, WSJ, 연합뉴스, 한국경제, 매일경제, 기업 IR, 연준·한은·BLS 원문을 우선한다.
 
@@ -24,11 +25,13 @@ market_summary: [{title, body}] (3개: 한국 / 미국 / 매크로),
 macro_view: {summary, points[] (3~5개)},
 news: [{title, source, url, why_it_matters}] (6~10개, url 필수, 실제 기사 링크),
 ai_sector: {summary, themes: [{title, body}] (3~4개), winners_losers, risks[], watch[]},
+power_sector: {summary, themes: [{title, body}] (2~3개), ls_electric (LS일렉트릭 이번 주 이슈 1~2문장), risks[], watch[]},
 calendar: [{date, event, why}] (4~7개),
 study_questions: [] (4~5개, 이번 주 사건과 보조지표/매크로 학습을 연결),
 slides: {one_liner, key_points[] (4~5개, 짧게), deep_dive_indicator}
 ```
 - `deep_dive_indicator` 는 `rsi`, `ma`, `bb`, `macd`, `stoch` 중 하나. 지난주와 다른 것을 고르되, 이번 주 시장 상황과 연결되는 지표를 고른다 (예: 급락장 → rsi, 박스권 → bb).
+- `power_sector` 의 수주 금액·실적 수치는 공시나 기사에 나온 값만 쓰고, 이번 주 특별한 소식이 없으면 그렇다고 쓴다. 전력 인프라 종목 등락률은 data/market.json 의 group "power" 값을 쓴다.
 - 한국어, 스터디원이 이해하기 쉬운 문장으로 쓴다. 전문용어는 처음 나올 때 짧게 풀어 쓴다.
 - 특정 종목 매수·매도 권유 표현("사라", "목표가")은 쓰지 않는다.
 
